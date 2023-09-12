@@ -113,5 +113,40 @@ tabulate_genes <- function(path) {
     return(accs.gene)
 }
 
+
+# CLEAN NCBI DATA
+clean_ncbi <- function(df) {
+    df.clean <- df %>%
+        distinct(gi_no, .keep_all=TRUE) %>% 
+        # filter
+        filter(gi_no!="NCBI_GENOMES") %>% 
+        filter(!is.na(sequence)) %>% 
+        filter(!grepl("UNVERIFIED:",gene_desc)) %>%
+        filter(!grepl("PREDICTED:",gene_desc)) %>%
+        filter(!grepl("similar to",gene_desc)) %>% 
+        filter(!grepl("mRNA",gene_desc)) %>% 
+        filter(!grepl("cDNA",gene_desc)) %>% 
+        filter(!grepl("transcribed",gene_desc)) %>% 
+        filter(!grepl("-like",gene_desc)) %>%
+        # fix names
+        mutate(label=taxon) %>%
+        mutate(label=str_replace_all(label," ","_")) %>%
+        mutate(label=str_replace_all(label,"'","")) %>%
+        mutate(label=str_replace_all(label,",","")) %>%
+        mutate(label=str_replace_all(label,"\\(","")) %>%
+        mutate(label=str_replace_all(label,"\\)","")) %>%
+        # fix lan lon
+        mutate(lat=paste(str_split_fixed(lat_lon, " ", 4)[,1], str_split_fixed(lat_lon, " ", 4)[,2]), lon=paste(str_split_fixed(lat_lon, " ", 4)[,3], str_split_fixed(lat_lon, " ", 4)[,4])) %>%
+        mutate(lat=if_else(grepl(" N",lat), true=str_replace_all(lat," N",""), false=if_else(grepl(" S",lat), true=paste0("-",str_replace_all(lat," S","")), false=lat))) %>%
+        mutate(lon=if_else(grepl(" E",lon), true=str_replace_all(lon," E",""), false=if_else(grepl(" W",lon), true=paste0("-",str_replace_all(lon," W","")), false=lon))) %>% 
+        mutate(lat=str_replace_all(lat,"^ ", NA_character_), lon=str_replace_all(lon,"^ ", NA_character_)) %>%
+        mutate(lat=suppressWarnings(as.numeric(lat)), lon=suppressWarnings(as.numeric(lon))) %>% 
+        mutate(length=as.numeric(length)) %>%
+        # remove
+        rename(scientificName=taxon,notesGenBank=gene_desc,dbid=gi_no,gbAccession=acc_no,catalogNumber=specimen_voucher,publishedAs=paper_title,publishedIn=journal,publishedBy=first_author,date=uploaded_date,decimalLatitude=lat,decimalLongitude=lon,nucleotides=sequence) %>%
+    return(df.clean)
+}
+
+
 # REPORT
 writeLines("\nPackages and functions loaded.\n")

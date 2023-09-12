@@ -42,6 +42,33 @@ writeLines("\nRetrieving metadata from NCBI ...\n")
 if(opt$threads > length(chunk.frag)) {stop("Error! You requested more threads than chunks. Please use fewer threads.")}
 ncbi.frag <- mcmapply(FUN=ncbi_byid_parallel, chunk.frag, SIMPLIFY=FALSE, USE.NAMES=FALSE, mc.cores=1)#opt$threads
 
+# check for errors (should all be "data.frame")
+if(length(sapply(ncbi.frag,class)) == length(which(sapply(ncbi.frag,class) == "data.frame"))) {
+    writeLines("\nNCBI metadata sucessfully retrieved")
+    } else {writeLines("\nNCBI search failed, try again")}
+
+# join
+frag.df <- as_tibble(bind_rows(ncbi.frag))
+
+# filter 
+frag.df.clean <- clean_ncbi(df=frag.df)
+
+
+# join with genes 
+frag.df.clean.genes <- frag.df.clean %>% 
+    left_join(rename(ids.all.tab,gbAccession=acc),by=join_by(gbAccession)) %>% 
+    filter(!is.na(gene)) %>%
+    select(scientificName,label,dbid,gbAccession,gene,length,organelle,catalogNumber,country,publishedAs,publishedIn,publishedBy,date,decimalLatitude,decimalLongitude,notesGenBank,taxonomy,nucleotides)
+
+### WRITE OUT
+
+
+# filter by species and sequence length
+frag.df.clean.genes.singles <- frag.df.clean.genes %>% group_by(gene,scientificName) %>%
+    slice_max(order_by=length,with_ties=FALSE,n=1) %>%
+    ungroup()
+
+
 
 # print and write out table
 #writeLines("\nAll clusters with number sequences, file size in kb, and description of first sequence.\n")
