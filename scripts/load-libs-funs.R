@@ -13,6 +13,7 @@ suppressMessages({
     library("glue")
     library("rfishbase")
     library("taxize")
+    library("knitr")
 })
 
 
@@ -120,7 +121,7 @@ tabulate_genes <- function(path) {
 # CLEAN NCBI DATA
 clean_ncbi <- function(df) {
     df.clean <- df |>
-        distinct(gi_no, .keep_all=TRUE) |> 
+        distinct(gi_no,.keep_all=TRUE) |> 
         # filter
         filter(gi_no!="NCBI_GENOMES") |> 
         filter(!is.na(sequence)) |> 
@@ -131,22 +132,56 @@ clean_ncbi <- function(df) {
         filter(!grepl("cDNA",gene_desc)) |> 
         filter(!grepl("transcribed",gene_desc)) |> 
         filter(!grepl("-like",gene_desc)) |>
-        # fix names
-        mutate(label=taxon) |>
-        mutate(label=str_replace_all(label," ","_")) |>
-        mutate(label=str_replace_all(label,"'","")) |>
-        mutate(label=str_replace_all(label,",","")) |>
-        mutate(label=str_replace_all(label,"\\(","")) |>
-        mutate(label=str_replace_all(label,"\\)","")) |>
         # fix lan lon
         mutate(lat=paste(str_split_fixed(lat_lon, " ", 4)[,1], str_split_fixed(lat_lon, " ", 4)[,2]), lon=paste(str_split_fixed(lat_lon, " ", 4)[,3], str_split_fixed(lat_lon, " ", 4)[,4])) |>
         mutate(lat=if_else(grepl(" N",lat), true=str_replace_all(lat," N",""), false=if_else(grepl(" S",lat), true=paste0("-",str_replace_all(lat," S","")), false=lat))) |>
         mutate(lon=if_else(grepl(" E",lon), true=str_replace_all(lon," E",""), false=if_else(grepl(" W",lon), true=paste0("-",str_replace_all(lon," W","")), false=lon))) |> 
         mutate(lat=str_replace_all(lat,"^ ", NA_character_), lon=str_replace_all(lon,"^ ", NA_character_)) |>
         mutate(lat=suppressWarnings(as.numeric(lat)), lon=suppressWarnings(as.numeric(lon))) |> 
+        # tidy up
         mutate(length=as.numeric(length)) |>
-        # remove
-        rename(scientificName=taxon,notesGenBank=gene_desc,dbid=gi_no,gbAccession=acc_no,catalogNumber=specimen_voucher,publishedAs=paper_title,publishedIn=journal,publishedBy=first_author,date=uploaded_date,decimalLatitude=lat,decimalLongitude=lon,nucleotides=sequence)
+        mutate(gi_no=as.character(gi_no)) |>
+        rename(scientificName=taxon,notesGenBank=gene_desc,dbid=gi_no,gbAccession=acc_no,catalogNumber=specimen_voucher,publishedAs=paper_title,publishedIn=journal,publishedBy=first_author,date=uploaded_date,decimalLatitude=lat,decimalLongitude=lon,nucleotides=sequence) |>
+        select(scientificName,dbid,gbAccession,gene,length,organelle,catalogNumber,country,publishedAs,publishedIn,publishedBy,date,decimalLatitude,decimalLongitude,nucleotides)
+    return(df.clean)
+}
+
+
+# SPLIT NAMES FUNCTION
+splitter <- function(x,n) {
+    splitz <- stringr::str_split_fixed(x,"_",4)
+    splitz1 <- splitz[,1]
+    splitz2 <- splitz[,2]
+    splitz3 <- splitz[,3]
+    splitz4 <- splitz[,4]
+    gstring <- case_when(
+        n==2 ~ glue("{splitz1}_{splitz2}"),
+        n==3 ~ glue("{splitz1}_{splitz2}_{splitz3}"),
+        n==4 ~ glue("{splitz1}_{splitz2}_{splitz3}:{splitz4}")
+        )
+    return(gstring)
+}
+
+
+# CLEAN NCBI DATA
+clean_names <- function(df) {
+    df.clean <- df |>
+        mutate(label=scientificName) |>
+        mutate(label=str_replace_all(label," ","_")) |>
+        mutate(label=str_replace_all(label,"'","")) |>
+        mutate(label=str_replace_all(label,",","")) |>
+        mutate(label=str_replace_all(label,"\\(","")) |>
+        mutate(label=str_replace_all(label,"\\)","")) |>
+        mutate(elements=str_count(label,"_")+1) |>
+        mutate(label=case_when(
+            elements == 2 ~ splitter(label,n=2),
+            elements == 3 ~ splitter(label,n=3),
+            str_detect(label,"cf\\.") ~ splitter(label,n=3),
+            elements > 3 ~ splitter(label,n=4)
+            )) |>
+        mutate(label=as.character(label)) |>
+        mutate(scientificName=label) |>
+        select(!c(label,elements))
     return(df.clean)
 }
 

@@ -1,53 +1,58 @@
 #!/usr/bin/env Rscript
 
-GOT UP TO HERE
-
-
 ##### LOAD LIBS FUNS ARGS #####
 
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("\nFiltering sequence data ...\n")
-
-# get args
-option_list <- list(
-    make_option(c("-f","--fishbase"), type="character"),
-    make_option(c("-t","--threads"), type="numeric")
-    )
-
-# set args
-opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
-cores <- opt$threads
-#cores <- 1
+writeLines("Filtering sequence data ...\n")
 
 
-##### FILTER #####
+##### LOAD DATA #####
+
+# get latest dir
+today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
+writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+ncbi.raw <- read_csv(here(today.dir,"ncbi-raw.csv"),show_col_types=FALSE)
+excl <- read_csv(here("assets/exclusions.csv"),show_col_types=FALSE)
 
 
+##### CLEAN AND REMOVE UNWANTED SEQUENCES #####
+
+# clean up the table
+ncbi.clean <- ncbi.raw |> clean_ncbi() |> clean_names()
+
+# drop exclusions
+ncbi.clean.excl <- ncbi.clean |> filter(!gbAccession %in% pull(excl,acc))
+
+# count drops and report
+ndrop <- nrow(ncbi.clean) - nrow(ncbi.clean.excl)
+#writeLines(glue("\nA total of {ndrop} sequence(s) have been excluded after filtering with 'assets/exclusions.csv'.\n",.trim=FALSE))
 
 
-# filter 
-frag.df.clean <- clean_ncbi(df=frag.df)
-
-
-# join with genes 
-frag.df.clean.genes <- frag.df.clean |> 
-    left_join(rename(ids.all.tab,gbAccession=acc),by=join_by(gbAccession)) |> 
-    filter(!is.na(gene)) |>
-    select(scientificName,label,dbid,gbAccession,gene,length,organelle,catalogNumber,country,publishedAs,publishedIn,publishedBy,date,decimalLatitude,decimalLongitude,notesGenBank,taxonomy,nucleotides)
-
-### WRITE OUT
-
+##### FILTER FOR LONGEST ONE INDIV PER SP #####
 
 # filter by species and sequence length
-frag.df.clean.genes.singles <- frag.df.clean.genes |> group_by(gene,scientificName) |>
+ncbi.clean.excl.filt <- ncbi.clean.excl |> 
+    group_by(gene,scientificName) |>
     slice_max(order_by=length,with_ties=FALSE,n=1) |>
-    ungroup()
+    ungroup() |> 
+    arrange(scientificName,gene)
 
 
+##### WRITE OUT #####
 
-# print and write out table
-#writeLines("\nAll clusters with number sequences, file size in kb, and description of first sequence.\n")
-#writeLines(paste("\nTable written out to",here(today.dir,"clusters.csv"),"\n"))
-#all.clusters.desc |> select(-path) |> print(n=Inf,width=Inf)
+# write out
+ncbi.clean.excl.filt |> write_csv(here(today.dir,"ncbi-clean.csv"))
+
+# get numbers
+nseq <- nrow(ncbi.clean.excl.filt)
+nspp <- distinct(ncbi.clean.excl.filt,scientificName) |> nrow()
+ngene <- distinct(ncbi.clean.excl.filt,gene) |> nrow()
+
+# print
+writeLines(glue("After filtering, {nseq} sequence(s) for {nspp} species have been retained for {ngene} genes as follows:",.trim=FALSE))
+ncbi.clean.excl.filt |> group_by(gene) |> summarise(n=n()) |> knitr::kable()
+
+# file
+writeLines(glue("\nCleaning of sequence data completed. Output written to 'temp/{basename(today.dir)}/ncbi-clean.csv'.\n",.trim=FALSE))
