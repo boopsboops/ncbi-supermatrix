@@ -23,9 +23,8 @@ genes.chosen <- unlist(str_split(opt$genes,","))
 #genes.chosen <- c("cox1","cytb","rag1")
 # scripts/pick-clusters.R -c 8,4,6 -g cox1,cytb,rag1
 
-# make date dir for results
-today.dir <- here("temp",paste0("Results_",Sys.Date()))
-if(!dir.exists(today.dir)) {dir.create(today.dir,recursive=TRUE)}
+# get latest dir
+today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
 
 # load csv
 clusters <- read_csv(here(today.dir,"clusters.csv"),show_col_types=FALSE)

@@ -15,9 +15,8 @@ option_list <- list(
 # set args
 opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 
-# make date dir for results
-today.dir <- here("temp",paste0("Results_",Sys.Date()))
-if(!dir.exists(today.dir)) {dir.create(today.dir,recursive=TRUE)}
+# get latest dir
+today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
 fas.in <- here(today.dir,"genbank-dump.fasta")
 
 # dereplicate
