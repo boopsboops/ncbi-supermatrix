@@ -17,6 +17,10 @@ suppressMessages({
 })
 
 
+# LOAD FROM GITHUB
+source("https://raw.githubusercontent.com/boopsboops/UTILITIES/main/RScripts/tab2fas.R")
+
+
 # ENTREZ PARALLEL SEARCH
 entrez_fetch_parallel <- function(webhist,chunks,file) {
     chunk.first <- dplyr::first(chunks)
@@ -204,6 +208,46 @@ ncbi_annotate <- function(genera) {
     return(tax.tab.tib)
 }
 
+
+# WRITE A FASTA FILE FROM DF
+write_fasta <- function(df,genez,dir) {
+    df.sub <- df |> filter(gene == genez) |> tab2fas(seqcol="nucleotides",namecol="scientificName")
+    df.sub |> write.FASTA(file=here(dir,glue("{genez}.fasta")))
+    #writeLines(glue("Unaligned fasta file written to 'temp/{basename(dir)}/{genez}.fasta'.",.trim=FALSE))
+}
+
+
+# ALIGN FASTA
+align_fasta <- function(infile,threads) {
+    outfile <- str_replace_all(infile,"\\.fasta",".aligned.fasta")
+    exe.string <- glue("mafft --quiet --auto --thread {threads} {infile} > {outfile}")
+    system(exe.string)
+    #writeLines(glue("Aligned fasta file written to '{basename(outfile)}'.",.trim=FALSE))
+}
+
+
+# TRIM FASTA
+trim_fasta <- function(infile,prop) {
+    infile <- str_replace_all(infile,"\\.fasta",".aligned.fasta")
+    outfile <- str_replace_all(infile,"\\.fasta",".trimmed.fasta")
+    exe.string <- glue("trimal -in {infile} -out {outfile} -gt {prop}")
+    system(exe.string)
+    writeLines(glue("\nAligned and trimmed fasta file written to '{basename(outfile)}'.",.trim=FALSE))
+}
+
+
+# MAKE PARTS
+partition_table <- function(mat) {
+    dims <- purrr::map(mat, \(x) dim(x)[2]) |> unlist()
+    parts.tib <- tibble(gene=genes,len=dims,cs=cumsum(dims)) |> 
+        mutate(cs1=cs+1,start=lag(cs1)) |>
+        replace_na(list(start=1)) |>
+        rename(end=cs) %>%
+        select(gene,start,end) %>%
+        mutate(parts=as.character(glue("DNA, {gene} = {start}-{end}"))) %>%
+        select(parts) 
+    return(parts.tib)
+}
 
 # REPORT
 writeLines("\nPackages and functions loaded.\n")
