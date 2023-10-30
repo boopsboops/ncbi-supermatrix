@@ -8,8 +8,8 @@ writeLines("\nCleaning and clustering sequence data ...\n")
 
 # get args
 option_list <- list( 
-    make_option(c("-m","--maxns"), type="numeric"),
-    make_option(c("-p","--clustersimp"), type="numeric")
+    make_option(c("-n","--maxns"), type="numeric"),
+    make_option(c("-c","--clustprop"), type="numeric")
     )
 
 # set args
@@ -23,10 +23,10 @@ fas.in <- here(today.dir,"genbank-dump.fasta")
 dereplicate_fasta(infile=fas.in)
 
 # filter
-filter_fasta(infile=fas.in,maxns=10)#opt$maxns
+filter_fasta(infile=fas.in,maxns=opt$maxns)
 
 # cluster
-cluster_fasta(infile=fas.in,identity=0.6)#opt$maxns
+cluster_fasta(infile=fas.in,identity=opt$clustprop)
 
 # load clusters
 clust.files <- list.files(here(today.dir),pattern="cluster\\.",full.names=TRUE)
@@ -59,5 +59,5 @@ write_csv(all.clusters.desc,file=here(today.dir,"clusters.csv"))
 
 # print and write out table
 writeLines("\nAll clusters with number sequences, file size in kb, and description of first sequence.\n")
-writeLines(paste("\nTable written out to",here(today.dir,"clusters.csv"),"\n"))
-all.clusters.desc %>% select(-path) %>% print(n=Inf,width=Inf)
+writeLines(paste("\nTable written out to",here(today.dir,"clusters.csv")))
+all.clusters.desc %>% select(-path) %>% knitr::kable()

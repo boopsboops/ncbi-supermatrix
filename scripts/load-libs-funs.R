@@ -35,8 +35,12 @@ entrez_fetch_parallel <- function(webhist,chunks,file) {
 
 
 # ENTREZ DOWNLOAD
-entrez_download <- function(clade,minlen,maxlen,batchsize,fasout) {
-    file.create(fasout,overwrite=TRUE)
+entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append) {
+    if (append=="false") {
+        file.create(fasout,overwrite=TRUE)
+    } else if (append=="true") {
+        Sys.sleep(1)
+    } else stop("\nError! the append flag '-a' must be 'true' or 'false'.\n")
     rtm <- as.integer(batchsize)
     if (rtm > 9999) {stop("\nError! Batch size can be no larger than 9,999.\n")}
     es.res <- rentrez::entrez_search(db="nucleotide",term=paste0(clade,"[ORGANISM] AND ",minlen,":",maxlen,"[SLEN]"),retmax=999999,use_history=TRUE)
@@ -161,7 +165,7 @@ splitter <- function(x,n) {
     gstring <- case_when(
         n==2 ~ glue("{splitz1}_{splitz2}"),
         n==3 ~ glue("{splitz1}_{splitz2}_{splitz3}"),
-        n==4 ~ glue("{splitz1}_{splitz2}_{splitz3}:{splitz4}")
+        n==4 ~ glue("{splitz1}_{splitz2}_{splitz3}-{splitz4}")
         )
     return(gstring)
 }
@@ -176,6 +180,7 @@ clean_names <- function(df) {
         mutate(label=str_replace_all(label,",","")) |>
         mutate(label=str_replace_all(label,"\\(","")) |>
         mutate(label=str_replace_all(label,"\\)","")) |>
+        mutate(label=str_replace_all(label,":","-")) |>
         mutate(elements=str_count(label,"_")+1) |>
         mutate(label=case_when(
             elements == 2 ~ splitter(label,n=2),
