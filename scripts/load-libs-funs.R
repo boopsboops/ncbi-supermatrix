@@ -14,6 +14,10 @@ suppressMessages({
     library("rfishbase")
     library("taxize")
     library("knitr")
+    library("castor")
+    library("treeio")
+    library("ggtree")
+    library("phangorn")
 })
 
 
@@ -150,7 +154,7 @@ clean_ncbi <- function(df) {
         mutate(length=as.numeric(length)) |>
         mutate(gi_no=as.character(gi_no)) |>
         rename(scientificName=taxon,notesGenBank=gene_desc,dbid=gi_no,gbAccession=acc_no,catalogNumber=specimen_voucher,publishedAs=paper_title,publishedIn=journal,publishedBy=first_author,date=uploaded_date,decimalLatitude=lat,decimalLongitude=lon,nucleotides=sequence) |>
-        select(scientificName,dbid,gbAccession,gene,length,organelle,catalogNumber,country,publishedAs,publishedIn,publishedBy,date,decimalLatitude,decimalLongitude,nucleotides)
+        select(scientificName,class,order,family,genus,dbid,gbAccession,gene,length,organelle,catalogNumber,country,publishedAs,publishedIn,publishedBy,date,decimalLatitude,decimalLongitude,nucleotides)
     return(df.clean)
 }
 
@@ -252,6 +256,20 @@ partition_table <- function(mat) {
         mutate(parts=as.character(glue("DNA, {gene} = {start}-{end}"))) %>%
         select(parts) 
     return(parts.tib)
+}
+
+
+# NEW RAXML-NG FUN
+raxml_ng <- function(file,model,maxthreads,epsilon,verbose) {
+    string.search <- glue("raxml-ng --search -threads auto{{{maxthreads}}} --workers auto --tree pars{{1}} --redo --seed 42 --model {model} --lh-epsilon {epsilon} --msa {file}")
+    if (verbose == "true") {
+        system(command=string.search,ignore.stdout=FALSE)
+        } else if (verbose == "false") {
+        system(command=string.search,ignore.stdout=TRUE)
+        } else stop(writeLines("Error! the '-v' flag must be 'true' or 'false'."))
+    rax.tr <- ape::read.tree(file=glue("{file}.raxml.bestTree"))
+    writeLines(glue("\nTree search completed for '{basename(file)}'.",.trim=FALSE))
+    return(rax.tr)
 }
 
 # REPORT
