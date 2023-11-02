@@ -21,4 +21,10 @@ scripts/filter-species.R
 # align trim and concatentate
 scripts/align-trim-concatenate.R -p 0.1 -t 4
 
+# run raxml tree search
+scripts/tree-search.R -m TN93+G -v false -e 0.1 -t 4
+
+# plot tree pdfs
+scripts/tree-plot.R -s 50
+
 ```
