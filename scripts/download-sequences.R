@@ -22,5 +22,8 @@ option_list <- list(
 # set args
 opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 
+# edit clade to remove underscore
+opt$clade <- str_replace_all(opt$clade,"_"," ")
+
 # run entrez
 seqs.fas <- entrez_download(clade=opt$clade,minlen=opt$minlen,maxlen=opt$maxlen,batchsize=opt$batch,append=opt$append,fasout=here(today.dir,"genbank-dump.fasta"))
