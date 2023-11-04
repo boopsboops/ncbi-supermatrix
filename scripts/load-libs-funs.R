@@ -39,18 +39,20 @@ entrez_fetch_parallel <- function(webhist,chunks,file) {
 
 
 # ENTREZ DOWNLOAD
-entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append) {
+entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry) {
     if (append=="false") {
         file.create(fasout,overwrite=TRUE)
     } else if (append=="true") {
         Sys.sleep(1)
     } else stop("\nError! the append flag '-a' must be 'true' or 'false'.\n")
     rtm <- as.integer(batchsize)
+    nots <- glue("NOT \"PREDICTED\"[All Fields] NOT \"UNVERIFIED\"[All Fields] NOT \"microsatellite\"[All Fields] NOT \"pseudogene\"[All Fields] NOT \"genomic survey sequence\"[All Fields]")# NOT \"transcribed\"[All Fields] NOT \"cDNA\"[All Fields]  NOT \"mRNA\"[All Fields] NOT \"whole genome shotgun sequence\"[All Fields]
     if (rtm > 9999) {stop("\nError! Batch size can be no larger than 9,999.\n")}
-    es.res <- rentrez::entrez_search(db="nucleotide",term=paste0(clade,"[ORGANISM] AND ",minlen,":",maxlen,"[SLEN]"),retmax=999999,use_history=TRUE)
-    if (rtm > es.res$count) {stop("\nError! Batch size value is larger than number of hits. Please use a smaller value.\n")}
+    es.res <- rentrez::entrez_search(db="nucleotide",term=glue("(\"{clade}\"[ORGANISM] AND {minlen}:{maxlen}[SLEN]) {nots}"),retmax=999999,use_history=TRUE)
+    if (dry=="true") {stop(glue("\rInformation: The number of hits for this search is {es.res$count}. Ensure that your batch size '-b' is lower than this value (but no larger than 9,999).\n",.trim=FALSE),call.=FALSE)}
+    if (rtm > es.res$count) {stop(glue("\nError! Batch size value ({rtm}) is larger than number of hits ({es.res$count}). Please use a smaller '-b' value.\n",.trim=FALSE))}
     writeLines(paste("\nNCBI search reports",length(es.res$ids),"hits for",clade,"...\n"))
-    if (length(es.res$ids) > 999999) {stop("\nError! You have more hits than can be downloaded. Please break up the search into smaller batches.\n")}
+    if (length(es.res$ids) > 999999) {stop("\nError! You have more hits than can be downloaded. Please break up the search into seperate clades.\n")}
     es.post <- entrez_post(db="nucleotide",web_history=es.res$web_history)
     query.split <- split(0:es.res$count,cut(0:es.res$count,ceiling(es.res$count/rtm),labels=FALSE))
     x <- mapply(function(x) entrez_fetch_parallel(webhist=es.post,chunks=x,file=fasout), x=query.split,SIMPLIFY=TRUE,USE.NAMES=FALSE)
