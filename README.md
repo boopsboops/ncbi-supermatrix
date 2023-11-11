@@ -16,7 +16,7 @@ Rscript -e "renv::restore()"
 
 ### RUNNING
 
-Here we search for our clade of interest (Ancistrus)
+Here we search for our clade of interest (Ancistrus), and an outgroup. Because the search is clade based on taxonomic names, to add an outgroup we perform a second search and append the results to the previous one with the '-a' flag. We also first run a dry run with the '-d' flag to calculate an effective size of download batch.
 
 ```bash
 # flag '-c' [name] is the clade of interest
@@ -34,32 +34,71 @@ Here we search for our clade of interest (Ancistrus)
 #    the 'false' option will overwrite previous files, while 'true' will add data
 # flag '-d' [true/false] is the dry run option that does not download any sequence data
 #    use this to estimate the batch size
+
+# perform the dry runs to estimate batch size
 scripts/download-sequences.R -c Ancistrus -n 500 -x 2500 -b 1 -a false -d true
 scripts/download-sequences.R -c Lasiancistrus_schomburgkii -n 500 -x 2500 -b 1 -a false -d true
 
+# now download the sequence data, setting batch size and appending our second search (Lasiancistrus) 
+scripts/download-sequences.R -c Ancistrus -n 500 -x 2500 -b 100 -a false -d false
+scripts/download-sequences.R -c Lasiancistrus_schomburgkii -n 500 -x 2500 -b 10 -a true -d false
 ```
 
+Here we dereplicated and clean up the resulting fasta sequences downloaded from NCBI. The clustering groups the sequences into putative homologous loci based on their similarity, and regardless of their annotation. The script returns a table with a list of 
 
 ```bash
-# dereplicate and cluster
+# flag '-n' is the maximum number of allowed missing data characters (Ns) in the sequence
+#    Ns might indicate poor quality sequence data
+# flag '-c' is the clustering threshold used to group the sequences into homologs
+#    a lower value may mean multiple loci in the same cluster, and a high value may result in one locus split over multiple clusters 
 scripts/clean-and-cluster.R -n 10 -c 0.6
+```
 
-# pick the clusters
+```bash
+# flag '-c' allows the user to pick clusters based on the numbered output of the 'clean-and-cluster.R' script
+#    be sure to check that you are choosing the right cluster
+# flag '-g' allows the use to give these cluster arbitrary names for reference
+#    don't use spaces, commas, or other punctuation characters in the names
 scripts/pick-clusters.R -c 8,4,6,7 -g cox1,cytb,rag1,rag2
+```
 
-# annotate the ncbi data with fishbase
+```bash
+# flag '-t' allows multithreading for obtaining metadata data from NCBI and FishBase
+#    only required for very large search with thousands of species
+#    do not use a '-t' value of more threads than is available on your machine
+# flag '-c' chooses the database to use for taxonomic annotation
+#    only 'ncbi'  and 'fishbase' are available
 scripts/annotate-ncbi.R -t 1 -c fishbase
+```
 
-# clean up the data and filter the species to one indiv 
+```bash
+# filter down to single indiv per spp.
 scripts/filter-species.R
+```
 
-# align trim and concatentate
+```bash
+# flag '-p' is the minimum proportion of missing data per site
+#    here sites with > 20% missing data are removed
+# flag '-t' is multithreading for the mafft alignment
+#    do not use a '-t' value of more threads than is available on your machine
 scripts/align-trim-concatenate.R -p 0.2 -t 4
+```
 
-# run raxml tree search
+```bash
+# flag '-m' is the phylogenetic model used by RAxML
+#    here we use a simple model to generate the tree
+# flag '-v' is the verbose option for RAxML
+#    set to 'true' to see full output if running into errors
+# flag '-e' is epsilon flag used used by RAxML
+#    a smaller epsilon value gives a more thorough tree search 
+# flag '-t' is multithreading for RAxML
+#    do not use a '-t' value of more threads than is available on your machine
 scripts/tree-search.R -m TN93+G -v false -e 0.1 -t 4
+```
 
-# plot tree pdfs
+```bash
+# flag '-s' is tree scaling factor
+#    bigger scaling factors are required for bigger trees
+#    experiment with this to get the tree plotted suitably on the page
 scripts/tree-plot.R -s 50
-
 ```
