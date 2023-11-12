@@ -59,7 +59,7 @@ scripts/clean-and-cluster.R -n 10 -c 0.6
 #    be sure to check that you are choosing the right cluster
 # flag '-g' allows the use to give these cluster arbitrary names for reference
 #    don't use spaces, commas, or other punctuation characters in the names
-scripts/pick-clusters.R -c 8,4,6,7 -g cox1,cytb,rag1,rag2
+scripts/pick-clusters.R -c 9,5,7,0,10,8,11 -g cox1,cytb,rag1,rnas,rhod,rag2,myh6
 ```
 
 ```bash
@@ -72,8 +72,9 @@ scripts/annotate-ncbi.R -t 1 -c fishbase
 ```
 
 ```bash
-# filter down to single indiv per spp.
-scripts/filter-species.R
+# flag '-n' is the length of species name
+#    make some examples
+scripts/filter-species.R -n 2
 ```
 
 ```bash
@@ -97,8 +98,15 @@ scripts/tree-search.R -m TN93+G -v false -e 0.1 -t 4
 ```
 
 ```bash
-# flag '-s' is tree scaling factor
+# flag '-w' is additional width proportion
+#    if your tip labels are being cut off increase this value
+#    or if too much white space, reduce
+# flag '-h' is the height-width ratio
+#    a ratio of 1.5 means the height will be 1.5 times the width
+#    increase this value to stop tip labels getting bunched up
+#    or decrease to make more compact
+# flag '-s' is tree scaling factor (multiplicative)
 #    bigger scaling factors are required for bigger trees
 #    experiment with this to get the tree plotted suitably on the page
-scripts/tree-plot.R -s 50
+scripts/tree-plot.R -w 0.6 -h 1.5 -s 1
 ```

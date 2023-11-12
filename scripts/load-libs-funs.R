@@ -155,30 +155,33 @@ clean_ncbi <- function(df) {
         # tidy up
         mutate(length=as.numeric(length)) |>
         mutate(gi_no=as.character(gi_no)) |>
+        mutate(scientificNameGenBank=taxon) |>
         rename(scientificName=taxon,notesGenBank=gene_desc,dbid=gi_no,gbAccession=acc_no,catalogNumber=specimen_voucher,publishedAs=paper_title,publishedIn=journal,publishedBy=first_author,date=uploaded_date,decimalLatitude=lat,decimalLongitude=lon,nucleotides=sequence) |>
-        select(scientificName,class,order,family,genus,dbid,gbAccession,gene,length,organelle,catalogNumber,country,publishedAs,publishedIn,publishedBy,date,decimalLatitude,decimalLongitude,nucleotides)
+        select(scientificName,scientificNameGenBank,class,order,family,genus,dbid,gbAccession,gene,length,organelle,catalogNumber,country,publishedAs,publishedIn,publishedBy,date,decimalLatitude,decimalLongitude,nucleotides)
     return(df.clean)
 }
 
 
 # SPLIT NAMES FUNCTION
 splitter <- function(x,n) {
-    splitz <- stringr::str_split_fixed(x,"_",4)
+    splitz <- stringr::str_split_fixed(x,"_",5)
     splitz1 <- splitz[,1]
     splitz2 <- splitz[,2]
     splitz3 <- splitz[,3]
     splitz4 <- splitz[,4]
+    splitz5 <- splitz[,5]
     gstring <- case_when(
         n==2 ~ glue("{splitz1}_{splitz2}"),
         n==3 ~ glue("{splitz1}_{splitz2}_{splitz3}"),
-        n==4 ~ glue("{splitz1}_{splitz2}_{splitz3}-{splitz4}")
+        n==4 ~ glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}"),
+        n==5 ~ glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}_{splitz5}")
         )
     return(gstring)
 }
 
 
 # CLEAN NCBI DATA
-clean_names <- function(df) {
+clean_names <- function(df,n) {
     df.clean <- df |>
         mutate(label=scientificName) |>
         mutate(label=str_replace_all(label," ","_")) |>
@@ -187,14 +190,20 @@ clean_names <- function(df) {
         mutate(label=str_replace_all(label,"\\(","")) |>
         mutate(label=str_replace_all(label,"\\)","")) |>
         mutate(label=str_replace_all(label,":","-")) |>
+        mutate(label=str_replace_all(label,"cf\\._","cf.")) |>
+        mutate(label=str_replace_all(label,"aff\\._","aff.")) |>
+        mutate(label=str_replace_all(label,"sp\\._","sp.")) |>
         mutate(elements=str_count(label,"_")+1) |>
         mutate(label=case_when(
-            elements == 2 ~ splitter(label,n=2),
-            elements == 3 ~ splitter(label,n=3),
-            str_detect(label,"cf\\.") ~ splitter(label,n=3),
-            elements > 3 ~ splitter(label,n=4)
+            n == 2 ~ splitter(label,n=2),
+            n == 3 ~ splitter(label,n=3),
+            n == 4 ~ splitter(label,n=4),
+            n == 5 ~ splitter(label,n=5),
+            #str_detect(label,"cf\\.") ~ splitter(label,n=3),
+            #elements > 4 ~ splitter(label,n=5)
             )) |>
         mutate(label=as.character(label)) |>
+        mutate(label=str_replace_all(label,"_+$","")) |>
         mutate(scientificName=label) |>
         select(!c(label,elements))
     return(df.clean)
@@ -273,6 +282,21 @@ raxml_ng <- function(file,model,maxthreads,epsilon,verbose) {
     writeLines(glue("\nTree search completed for '{basename(file)}'.",.trim=FALSE))
     return(rax.tr)
 }
+
+
+# MAKE TREE PLOTTING FUN
+ggtree_autoplot <- function(path,tb,scale.factor,width,hratio) {
+    tr <- treeio::read.newick(path)
+    tr <- phangorn::midpoint(tr)
+    tree.length <- max(castor::get_all_distances_to_root(tr)) + (max(castor::get_all_distances_to_root(tr)) * width)
+        p <- ggtree(tr, ladderize=TRUE,right=TRUE,size=0.7) %<+% tb
+        pp <- p + geom_tiplab(offset=0,aes(label=tiplabel),align=FALSE,size=4) +
+        geom_tippoint(aes(color=genus),size=2.5) +
+        theme(legend.position="none") +
+        xlim(0,tree.length)
+    ggsave(filename=glue("{path}.pdf"),plot=pp,limitsize=FALSE,width=200,height=200*hratio,units="mm",scale=scale.factor)
+}
+
 
 # REPORT
 writeLines("\nPackages and functions loaded.\n")

@@ -28,3 +28,6 @@ opt$clade <- str_replace_all(opt$clade,"_"," ")
 
 # run entrez
 seqs.fas <- entrez_download(clade=opt$clade,minlen=opt$minlen,maxlen=opt$maxlen,batchsize=opt$batch,append=opt$append,dry=opt$dry,fasout=here(today.dir,"genbank-dump.fasta"))
+
+# remove annoying TRUE file
+if (file.exists(here("TRUE"))) {file.remove(here("TRUE"))}

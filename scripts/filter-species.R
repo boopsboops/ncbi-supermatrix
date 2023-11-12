@@ -7,6 +7,15 @@ source(here::here("scripts/load-libs-funs.R"))
 # info
 writeLines("Filtering sequence data ...\n")
 
+# get args
+option_list <- list( 
+    make_option(c("-n","--names"), type="numeric")
+    )
+
+# set args
+opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
+#opt <- NULL
+#opt$names <- 2
 
 ##### LOAD DATA #####
 
@@ -20,7 +29,8 @@ excl <- read_csv(here("assets/exclusions.csv"),show_col_types=FALSE)
 ##### CLEAN AND REMOVE UNWANTED SEQUENCES #####
 
 # clean up the table
-ncbi.clean <- ncbi.raw |> clean_ncbi() |> clean_names()
+ncbi.clean <- ncbi.raw |> clean_ncbi() |> clean_names(n=opt$names)
+#ncbi.clean |> distinct(scientificName) |> print(n=Inf)
 
 # drop exclusions
 ncbi.clean.excl <- ncbi.clean |> filter(!gbAccession %in% pull(excl,acc))

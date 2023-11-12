@@ -80,7 +80,7 @@ if(!dir.exists(here(today.dir,"tempfiles"))) {dir.create(here(today.dir,"tempfil
 today.files <- list.files(today.dir,include.dirs=FALSE,recursive=TRUE,full.names=TRUE)
 
 # grep ones we want
-want <- "concatenated-matrix|trimmed.fasta|ncbi-clean"
+want <- "concatenated-matrix|trimmed.fasta|ncbi-clean|ncbi-raw"
 files.from <- today.files[!str_detect(today.files,want)]
 
 # add temp dir path
