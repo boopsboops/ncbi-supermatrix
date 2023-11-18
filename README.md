@@ -1,10 +1,12 @@
-# ncbi-supermatrix
+# NCBI Supermatrix
 
-This is pipeline that will assemble phylogenetic 'supermatrix' datasets directly from NCBI. Currently working on Ubuntu Linux.
+This is pipeline that will assemble phylogenetic 'supermatrix' datasets directly from the [NCBI nucleotide](https://www.ncbi.nlm.nih.gov/nucleotide) database. Currently working on Ubuntu Linux.
 
 ### INSTALLATION
 
-First ensure that [vsearch](https://github.com/torognes/vsearch), [trimal](https://github.com/inab/trimal), [mafft](https://mafft.cbrc.jp/alignment/software/) and [raxml-ng](https://github.com/amkozlov/raxml-ng) are installed and on your `$PATH`. Both mafft and vsearch can be installed from Ubuntu repositories with `sudo apt install mafft vsearch`. The others will need to be compiled. Check they are all installed by running e.g. `which mafft` or `which vsearch` in your home directory.x
+First ensure that [git v2.x](https://git-scm.com/downloads), [R v4.3.x](https://cloud.r-project.org/), [vsearch v2.x](https://github.com/torognes/vsearch), [trimal v1.4](https://github.com/inab/trimal), [mafft v7.x](https://mafft.cbrc.jp/alignment/software/) and [raxml-ng v1.2](https://github.com/amkozlov/raxml-ng) are installed and available on your `$PATH`. Newer versions of these programs will likely work, but R needs to be v4.3. Both git, mafft and vsearch can be installed from Ubuntu Linux repositories with `sudo apt install git mafft vsearch` or via Homebrew for Mac with `brew install git mafft vsearch`. The others will need to be installed via instructions on their respective GitHub pages. Check they are all installed by running e.g. `which mafft` or `which vsearch` in your home directory. The [renv-installer](https://github.com/jcrodriguez1989/renv-installer) software is useful for managing multiple R versions across projects.
+
+To install NCBI-Supermatrix:
 
 ```
 # clone the repository 
@@ -50,8 +52,9 @@ Here we dereplicated and clean up the resulting fasta sequences downloaded from 
 # flag '-n' is the maximum number of allowed missing data characters (Ns) in the sequence
 #    Ns might indicate poor quality sequence data
 # flag '-c' is the clustering threshold used to group the sequences into homologs
-#    a lower value may mean multiple loci in the same cluster, and a high value may result in one locus split over multiple clusters 
+#    a lower value may mean multiple loci in the same cluster, and a high value may result in one locus split over multiple clusters
 scripts/clean-and-cluster.R -n 10 -c 0.6
+# if this step results in error run 'rm cluster*' in the 'temp/Results_today' directory and try again.
 ```
 
 ```bash
@@ -94,7 +97,7 @@ scripts/align-trim-concatenate.R -p 0.2 -t 4
 #    a smaller epsilon value gives a more thorough tree search 
 # flag '-t' is multithreading for RAxML
 #    do not use a '-t' value of more threads than is available on your machine
-scripts/tree-search.R -m TN93+G -v false -e 0.1 -t 4
+scripts/tree-search.R -m TN93+G -v false -e 10 -t 4
 ```
 
 ```bash
