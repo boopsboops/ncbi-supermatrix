@@ -25,6 +25,16 @@ suppressMessages({
 source("https://raw.githubusercontent.com/boopsboops/UTILITIES/main/RScripts/tab2fas.R")
 
 
+# FUN TO GET DESCRIPTIONS FROM GENBANK
+read_genbank <- function(accs) {
+    Sys.sleep(1)
+    gb.accs <- ape::read.GenBank(accs)
+    gb.accs.tib <- tibble(facc=labels(gb.accs),description=attr(gb.accs,"description"))
+    writeLines(glue("Cluster information downloaded for {length(accs)} hits."))
+    return(gb.accs.tib)
+}
+
+
 # ENTREZ PARALLEL SEARCH
 entrez_fetch_parallel <- function(webhist,chunks,file) {
     chunk.first <- dplyr::first(chunks)

@@ -46,15 +46,17 @@ scripts/download-sequences.R -c Ancistrus -n 500 -x 2500 -b 100 -a false -d fals
 scripts/download-sequences.R -c Lasiancistrus_schomburgkii -n 500 -x 2500 -b 10 -a true -d false
 ```
 
-Here we dereplicated and clean up the resulting fasta sequences downloaded from NCBI. The clustering groups the sequences into putative homologous loci based on their similarity, and regardless of their annotation. The script returns a table with a list of 
+Here we dereplicated and clean up the resulting fasta sequences downloaded from NCBI. The clustering groups the sequences into putative homologous loci based on their similarity, and regardless of their annotation. The script returns a table with a list of clusters and their size. If this step results in error run 'rm cluster*' in the 'temp/Results_today' directory and try again.
 
 ```bash
 # flag '-n' is the maximum number of allowed missing data characters (Ns) in the sequence
 #    Ns might indicate poor quality sequence data
 # flag '-c' is the clustering threshold used to group the sequences into homologs
 #    a lower value may mean multiple loci in the same cluster, and a high value may result in one locus split over multiple clusters
-scripts/clean-and-cluster.R -n 10 -c 0.6
-# if this step results in error run 'rm cluster*' in the 'temp/Results_today' directory and try again.
+# flag '-m' is the minimum retained cluster size
+#    all clusters with 3 or more sequences are retained
+#    to retain all clusters use a value of 0
+scripts/clean-and-cluster.R -n 10 -c 0.6 -m 3
 ```
 
 ```bash
