@@ -39,7 +39,8 @@ invisible(file.copy(all.files,here(today.dir,"backup"),copy.date=TRUE))
 
 # delete
 invisible(file.remove(all.files))
-
+# remove annoying TRUE file
+if (file.exists(here("TRUE"))) {invisible(file.remove(here("TRUE")))}
 
 ##### REPORT #####
 
