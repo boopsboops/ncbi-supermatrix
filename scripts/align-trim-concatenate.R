@@ -57,33 +57,15 @@ ali.all.mat <- purrr::map(ali.all, as.matrix)
 genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat,fill.with.gaps=TRUE)))
 
 # write out
-genes.concat |> write.FASTA(file=here(today.dir,"concatenated-matrix.fasta"))
-genes.concat |> write.dna(file=here(today.dir,"concatenated-matrix.phy"),format="sequential",nbcol=-1,colsep="")
-genes.concat |> write.nexus.data(file=here(today.dir,"concatenated-matrix.nex"),interleaved=FALSE)
+genes.concat |> write.FASTA(file=here(today.dir,"concatenated.aligned.trimmed.fasta"))
+genes.concat |> write.dna(file=here(today.dir,"concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
+genes.concat |> write.nexus.data(file=here(today.dir,"concatenated.aligned.trimmed.nex"),interleaved=FALSE)
 
 # make partion file and write out
-partition_table(mat=ali.all.mat) |> write_tsv(here(today.dir,"concatenated-matrix.parts"),col_names=FALSE)
+partition_table(mat=ali.all.mat) |> write_tsv(here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
 
 # file
-writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated-matrix.fasta'.",.trim=FALSE))
-writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated-matrix.nex'.",.trim=FALSE))
-writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated-matrix.phy'.",.trim=FALSE))
-writeLines(glue("\nRAxML partitions file written to 'temp/{basename(today.dir)}/concatenated-matrix.parts'.\n",.trim=FALSE))
-
-
-###### CLEAN UP #####
-
-# make dir
-if(!dir.exists(here(today.dir,"tempfiles"))) {dir.create(here(today.dir,"tempfiles"),recursive=TRUE)}
-
-# list files
-today.files <- list.files(today.dir,include.dirs=FALSE,recursive=TRUE,full.names=TRUE)
-
-# grep ones we want
-want <- "concatenated-matrix|trimmed.fasta|ncbi-clean|ncbi-raw"
-files.from <- today.files[!str_detect(today.files,want)]
-
-# add temp dir path
-files.to <- here(today.dir,"tempfiles",basename(files.from))
-
-invisible(file.rename(from=files.from,to=files.to))
+writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.fasta'.",.trim=FALSE))
+writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.nex'.",.trim=FALSE))
+writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.phy'.",.trim=FALSE))
+writeLines(glue("\nRAxML partitions file written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.parts'.\n",.trim=FALSE))

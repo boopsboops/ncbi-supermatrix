@@ -32,7 +32,17 @@ writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FAL
 ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE)
 
 # list fasta
-fasta.files <- list.files(today.dir,pattern="*.fasta$",recursive=FALSE,full.names=TRUE)
+fasta.files <- list.files(today.dir,pattern="*.aligned.trimmed.fasta$",recursive=FALSE,full.names=TRUE)
+#print(fasta.files)
+
+##### CHECK NUMBERS OF TAXA #####
+
+# read files in and get length
+files.fas <- purrr::map(fasta.files,ape::read.FASTA)
+files.fas.length <- purrr::map(files.fas,length)
+
+# filter length > 4
+fasta.files.tree <- fasta.files[files.fas.length > 4]
 
 
 ##### RUN RAXML #####
@@ -41,21 +51,12 @@ fasta.files <- list.files(today.dir,pattern="*.fasta$",recursive=FALSE,full.name
 #xtr <- raxml_ng(file=fasta.files[6],model="TN93+G",maxthreads=8,epsilon=0.1)
 
 # run on all 
-purrr::walk(fasta.files, \(x) raxml_ng(file=x,model=opt$model,maxthreads=opt$threads,epsilon=opt$epsilon,verbose=opt$verbose))
+purrr::walk(fasta.files.tree, \(x) raxml_ng(file=x,model=opt$model,maxthreads=opt$threads,epsilon=opt$epsilon,verbose=opt$verbose))
 
-
-##### CLEAN UP #####
-
-# list files
-rax.files <- list.files(today.dir,pattern="*.raxml.",include.dirs=FALSE,recursive=TRUE,full.names=TRUE)
-
-# grep ones we want
-want <- "raxml.bestTree$"
-files.from <- rax.files[!str_detect(rax.files,want)]
-
-# add temp dir path
-if(!dir.exists(here(today.dir,"tempfiles"))) {dir.create(here(today.dir,"tempfiles"),recursive=TRUE)}
-files.to <- here(today.dir,"tempfiles",basename(files.from))
-
-# mv
-invisible(file.rename(from=files.from,to=files.to))
+# print warning
+if(length(fasta.files.tree) < length(fasta.files)) {
+    # get names of length <= 4 
+    fasta.files.err <- fasta.files[files.fas.length <= 4] |> basename() |> str_replace_all("\\.aligned\\.trimmed\\.fasta","")
+    fasta.files.err.genes <- paste(fasta.files.err,collapse=", ")
+    writeLines(glue("\nWARNING! The following loci had < 5 individuals, so gene trees could not be computed for these: {fasta.files.err.genes}\n",.trim=FALSE))
+}

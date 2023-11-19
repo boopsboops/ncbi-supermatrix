@@ -54,9 +54,10 @@ Here we dereplicated and clean up the resulting fasta sequences downloaded from 
 # flag '-c' is the clustering threshold used to group the sequences into homologs
 #    a lower value may mean multiple loci in the same cluster, and a high value may result in one locus split over multiple clusters
 # flag '-m' is the minimum retained cluster size
-#    all clusters with 3 or more sequences are retained
-#    to retain all clusters use a value of 0
-scripts/clean-and-cluster.R -n 10 -c 0.6 -m 3
+#    all clusters with n or more sequences are retained
+#    to remove singleton clusters use a value of 2
+#    to retain all clusters use a value of 1
+scripts/clean-and-cluster.R -n 10 -c 0.6 -m 2
 ```
 
 ```bash
@@ -114,4 +115,9 @@ scripts/tree-search.R -m TN93+G -v false -e 10 -t 4
 #    bigger scaling factors are required for bigger trees
 #    experiment with this to get the tree plotted suitably on the page
 scripts/tree-plot.R -w 0.6 -h 1.5 -s 1
+```
+
+```bash
+# clean up and tidy the results directory
+scripts/tidy-results-directory.R
 ```
