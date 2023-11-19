@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/689690400.svg)](https://zenodo.org/doi/10.5281/zenodo.10157383)
+
 # NCBI Supermatrix
 
 This is pipeline that will assemble phylogenetic 'supermatrix' datasets directly from the [NCBI nucleotide](https://www.ncbi.nlm.nih.gov/nucleotide) database. Currently working on Ubuntu Linux.
