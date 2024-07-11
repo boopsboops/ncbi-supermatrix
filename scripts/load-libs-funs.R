@@ -18,6 +18,7 @@ suppressMessages({
     library("treeio")
     library("ggtree")
     library("phangorn")
+    library("cli")
 })
 
 
@@ -240,8 +241,12 @@ ncbi_annotate <- function(genera) {
 
 
 # WRITE A FASTA FILE FROM DF
-write_fasta <- function(df,genez,dir) {
-    df.sub <- df |> filter(gene == genez) |> tab2fas(seqcol="nucleotides",namecol="scientificName")
+write_fasta <- function(df,genez,dir,pop) {
+    if(isFALSE(pop)) {
+        df.sub <- df |> filter(gene == genez) |> tab2fas(seqcol="nucleotides",namecol="scientificName")
+    } else if(isTRUE(pop)) {
+        df.sub <- df |> filter(gene == genez) |> tab2fas(seqcol="nucleotides",namecol="gbAccession")
+    }
     df.sub |> write.FASTA(file=here(dir,glue("{genez}.fasta")))
     #writeLines(glue("Unaligned fasta file written to 'temp/{basename(dir)}/{genez}.fasta'.",.trim=FALSE))
 }
@@ -262,7 +267,7 @@ trim_fasta <- function(infile,prop) {
     outfile <- str_replace_all(infile,"\\.fasta",".trimmed.fasta")
     exe.string <- glue("trimal -in {infile} -out {outfile} -gt {prop}")
     system(exe.string)
-    writeLines(glue("\nAligned and trimmed fasta file written to '{basename(outfile)}'.",.trim=FALSE))
+    writeLines(glue("\nAligned and trimmed fasta file written to '{basename(outfile)}'.\n",.trim=FALSE))
 }
 
 

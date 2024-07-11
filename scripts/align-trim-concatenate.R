@@ -10,7 +10,8 @@ writeLines("Aligning and trimming sequence data ...\n")
 # get args
 option_list <- list( 
     make_option(c("-p","--prop"), type="numeric"),
-    make_option(c("-t","--threads"), type="numeric")
+    make_option(c("-t","--threads"), type="numeric"),
+    make_option(c("-i","--indiv"), type="character")
     )
 
 # set args
@@ -35,13 +36,22 @@ genes <- ncbi.clean |> distinct(gene) |> pull()
 genes.files <- here(today.dir,glue("{genes}.fasta"))
 
 # write out
-purrr::walk(genes, \(x) write_fasta(df=ncbi.clean,gene=x,dir=today.dir))
+purrr::walk(genes, \(x) write_fasta(df=ncbi.clean,gene=x,dir=today.dir,pop=as.logical(opt$indiv)))
 
 # align
 purrr::walk(genes.files, \(x) align_fasta(infile=x,threads=opt$threads))
 
 # trim
 purrr::walk(genes.files, \(x) trim_fasta(infile=x,prop=opt$prop))
+
+
+#### STOP IF POP ####
+
+# end the script if in pop mode
+if(opt$indiv == "true") {
+   cli::cli_alert_success("Finished running in pop mode.\f")
+   quit(save="no")
+}
 
 
 ##### CONCATENATE AND WRITE OUT #####

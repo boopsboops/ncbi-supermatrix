@@ -119,7 +119,10 @@ The `filter-species.R` cleans up the species names and picks the longest sequenc
 #    the spaces after 'sp.' or 'aff.' or 'cf.' are automatically removed
 #    '-n 2' will turn 'Akysis sp. INHS 93579' into 'Akysis sp.INHS'
 #    '-n 3' will turn 'Akysis sp. INHS 93579' into 'Akysis sp.INHS 93579'
-scripts/filter-species.R -n 3
+# flag '-i' [logical] is the flag for individual (population level) or species level output
+#    '-i false' will produce one sequence per species
+#    '-i true' will produce all sequences per species
+scripts/filter-species.R -n 3 -i false
 ```
 
 
@@ -132,7 +135,12 @@ The `align-trim-concatenate.R` script aligns each locus seperately and trims mis
 #    '-p 0.2' means sites with < 20% data are removed
 # flag '-t' [integer] is multithreading for the mafft alignment
 #    do not use a '-t' value of more threads than is available on your machine
-scripts/align-trim-concatenate.R -p 0.2 -t 4
+# flag '-i' [logical] is the flag for individual (population level) or species level output
+#    the script will stop after it produces one fasta file per gene and does not currently attempt to concatentate the genes
+#    it is intended for separate gene analyses but may be adapted in future to concatenate
+#    '-i false' will produce one sequence per species
+#    '-i true' will produce all sequences per species
+scripts/align-trim-concatenate.R -p 0.2 -t 4 -i false
 ```
 
 

@@ -9,7 +9,8 @@ writeLines("Filtering sequence data ...\n")
 
 # get args
 option_list <- list( 
-    make_option(c("-n","--names"), type="numeric")
+    make_option(c("-n","--names"), type="numeric"),
+    make_option(c("-i","--indiv"), type="character")
     )
 
 # set args
@@ -42,12 +43,20 @@ ndrop <- nrow(ncbi.clean) - nrow(ncbi.clean.excl)
 
 ##### FILTER FOR LONGEST ONE INDIV PER SP #####
 
-# filter by species and sequence length
-ncbi.clean.excl.filt <- ncbi.clean.excl |> 
-    group_by(gene,scientificName) |>
-    slice_max(order_by=length,with_ties=FALSE,n=1) |>
-    ungroup() |> 
-    arrange(scientificName,gene)
+if(opt$indiv == "false") {
+    # filter by species and sequence length
+    cli::cli_alert_info("Running in species mode.")
+    ncbi.clean.excl.filt <- ncbi.clean.excl |> 
+        group_by(gene,scientificName) |>
+        slice_max(order_by=length,with_ties=FALSE,n=1) |>
+        ungroup() |> 
+        arrange(scientificName,gene)
+    } else if(opt$indiv == "true") {
+    # or do nothing if pop
+    cli::cli_alert_info("Running in pop mode.\f")
+    ncbi.clean.excl.filt <- ncbi.clean.excl
+    } else {stop(writeLines("Error! the '-i' flag must be 'true' or 'false'."))
+}
 
 
 ##### WRITE OUT #####
