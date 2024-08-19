@@ -32,8 +32,13 @@ tree.files <- list.files(today.dir,pattern="*.fasta.raxml.bestTree$",recursive=F
 
 ##### AUTO PLOT #####
 
-# make tip labels
-ncbi.clean.tips <- ncbi.clean |> distinct(scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))
+# make tip labels for concat and single genes
+if(length(tree.files) > 1) {
+    ncbi.clean.tips <- ncbi.clean |> distinct(scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))
+}
+if(length(tree.files) == 1) {
+    ncbi.clean.tips <- ncbi.clean |> distinct(gbAccession,scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))
+}
 
 # fun plot function over all trees
 purrr::walk(tree.files, \(x) ggtree_autoplot(path=x,tb=ncbi.clean.tips,scale.factor=opt$scalefactor,width=opt$width,hratio=opt$hratio))
