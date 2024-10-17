@@ -62,7 +62,7 @@ scripts/download-sequences.R -c Amblyceps_mangois -n 500 -x 2500 -b 30 -a true -
 
 #### clean-and-cluster.R
 
-The `clean-and-cluster.R` script dereplicates and clean up the resulting fasta sequences downloaded from NCBI. The clustering groups the sequences into putative homologous loci based on their similarity, and regardless of their annotation. The script returns a table with a list of clusters and their size. If this step results in error run `rm cluster*` in the `temp/Results_today` directory and try again. To save computation time, use the '-m' flag to remove clusters with low numbers of sequences.
+The `clean-and-cluster.R` script dereplicates (optional) and cleans up the resulting fasta sequences downloaded from NCBI. The clustering groups the sequences into putative homologous loci based on their similarity, and regardless of their annotation. The script returns a table with a list of clusters and their size. If this step results in error run `rm cluster*` in the `temp/Results_today` directory and try again. To save computation time, use the '-m' flag to remove clusters with low numbers of sequences.
 
 ```bash
 # flag '-n' [integer] is the maximum number of allowed missing data characters (Ns) in the sequence
@@ -76,7 +76,11 @@ The `clean-and-cluster.R` script dereplicates and clean up the resulting fasta s
 #    all clusters with value of '-m' or greater are retained
 #    to remove singleton clusters use a value of 2
 #    to retain all clusters use a value of 1
-scripts/clean-and-cluster.R -n 10 -c 0.6 -m 2
+# flag '-d' [logical] is dereplication
+#    dereplication removes all identical (duplicate) sequences
+#    to remove duplicates use a value of 'true'
+#    to keep duplicates use a value of 'false'
+scripts/clean-and-cluster.R -n 10 -c 0.6 -m 2 -d true
 ```
 
 
