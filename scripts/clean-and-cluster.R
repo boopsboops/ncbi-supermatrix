@@ -10,7 +10,8 @@ writeLines("\nCleaning and clustering sequence data ...\n")
 option_list <- list( 
     make_option(c("-n","--maxns"), type="numeric"),
     make_option(c("-c","--clustprop"), type="numeric"),
-    make_option(c("-m","--minclust"), type="numeric")
+    make_option(c("-m","--minclust"), type="numeric"),
+    make_option(c("-d","--derep"), type="character")
     )
 
 # set args
@@ -23,7 +24,7 @@ today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
 fas.in <- here(today.dir,"genbank-dump.fasta")
 
 # dereplicate
-dereplicate_fasta(infile=fas.in)
+dereplicate_fasta(infile=fas.in,dereplicate=opt$derep)
 
 # filter
 filter_fasta(infile=fas.in,maxns=opt$maxns)

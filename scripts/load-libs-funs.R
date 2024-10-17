@@ -99,10 +99,14 @@ ncbi_byid_parallel <- function(accs){
 
 
 # DEREPLICATE FASTA
-dereplicate_fasta <- function(infile) {
+dereplicate_fasta <- function(infile,dereplicate) {
     outfile <- str_replace_all(infile,"\\.fasta",".derep.fasta")
-    exe.string <- paste("vsearch --threads 0 --fastx_uniques",infile,"--fastaout",outfile)
-    system(exe.string)
+        if (dereplicate=="true") {
+            exe.string <- paste("vsearch --threads 0 --fastx_uniques",infile,"--fastaout",outfile)
+            system(exe.string)
+        } else if (dereplicate=="false") {
+            file.copy(infile,outfile)
+        } else stop("\nError! the dereplicate flag '-d' must be 'true' or 'false'.\n")
 }
 
 
