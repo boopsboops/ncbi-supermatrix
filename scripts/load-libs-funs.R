@@ -310,7 +310,7 @@ ggtree_autoplot <- function(path,tb,scale.factor,width,hratio) {
     tree.length <- max(castor::get_all_distances_to_root(tr)) + (max(castor::get_all_distances_to_root(tr)) * width)
         p <- ggtree(tr, ladderize=TRUE,right=TRUE,size=0.7) %<+% tb
         pp <- p + geom_tiplab(offset=0,aes(label=tiplabel),align=FALSE,size=4) +
-        geom_tippoint(aes(color=genus),size=2.5) +
+        geom_tippoint(aes(color=tip.colour),size=2.5) +
         theme(legend.position="none") +
         xlim(0,tree.length)
     ggsave(filename=glue("{path}.pdf"),plot=pp,limitsize=FALSE,width=200,height=200*hratio,units="mm",scale=scale.factor)

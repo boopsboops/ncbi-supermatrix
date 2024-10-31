@@ -29,7 +29,7 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 # get latest dir
 today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
 writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
-ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE)
+#ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 # list fasta
 fasta.files <- list.files(today.dir,pattern="*.aligned.trimmed.fasta$",recursive=FALSE,full.names=TRUE)

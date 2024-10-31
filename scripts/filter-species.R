@@ -23,8 +23,8 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 # get latest dir
 today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
 writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
-ncbi.raw <- read_csv(here(today.dir,"ncbi-raw.csv"),show_col_types=FALSE)
-excl <- read_csv(here("assets/exclusions.csv"),show_col_types=FALSE)
+ncbi.raw <- read_csv(here(today.dir,"ncbi-raw.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
+excl <- read_csv(here("assets/exclusions.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 
 ##### CLEAN AND REMOVE UNWANTED SEQUENCES #####

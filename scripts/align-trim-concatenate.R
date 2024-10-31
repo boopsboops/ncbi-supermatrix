@@ -17,7 +17,7 @@ option_list <- list(
 # set args
 opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt <- NULL
-#opt$prop <- 0.1
+#opt$prop <- 0.2
 #opt$threads <- 4
 
 
@@ -26,7 +26,7 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 # get latest dir
 today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
 writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
-ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE)
+ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 
 #### ALIGN AND TRIM FASTA #####
@@ -36,7 +36,7 @@ genes <- ncbi.clean |> distinct(gene) |> pull()
 genes.files <- here(today.dir,glue("{genes}.fasta"))
 
 # write out
-purrr::walk(genes, \(x) write_fasta(df=ncbi.clean,gene=x,dir=today.dir,pop=as.logical(opt$indiv)))
+purrr::walk(genes, \(x) write_fasta(df=ncbi.clean,genez=x,dir=today.dir,pop=as.logical(opt$indiv)))
 
 # align
 purrr::walk(genes.files, \(x) align_fasta(infile=x,threads=opt$threads))

@@ -24,7 +24,7 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 # get latest dir
 today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
 writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
-ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE)
+ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 # list trees
 tree.files <- list.files(today.dir,pattern="*.fasta.raxml.bestTree$",recursive=FALSE,full.names=TRUE)
@@ -34,10 +34,10 @@ tree.files <- list.files(today.dir,pattern="*.fasta.raxml.bestTree$",recursive=F
 
 # make tip labels for concat and single genes
 if(length(tree.files) > 1) {
-    ncbi.clean.tips <- ncbi.clean |> distinct(scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))
+    ncbi.clean.tips <- ncbi.clean |> distinct(scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))  |> mutate(tip.colour=genus)
 }
 if(length(tree.files) == 1) {
-    ncbi.clean.tips <- ncbi.clean |> distinct(gbAccession,scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))
+    ncbi.clean.tips <- ncbi.clean |> distinct(gbAccession,scientificName,genus,family) |> mutate(tiplabel=glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")) |> mutate(tip.colour=scientificName)
 }
 
 # fun plot function over all trees
