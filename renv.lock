@@ -450,18 +450,20 @@
     },
     "castor": {
       "Package": "castor",
-      "Version": "1.7.11",
+      "Version": "1.8.3",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "Matrix",
         "RSpectra",
         "Rcpp",
+        "jsonlite",
+        "methods",
         "naturalsort",
         "parallel",
         "stats"
       ],
-      "Hash": "fc0c2ecbf21b8041452d5266088fc441"
+      "Hash": "f482783a7a619386625eddc2c2931a7b"
     },
     "cellranger": {
       "Package": "cellranger",

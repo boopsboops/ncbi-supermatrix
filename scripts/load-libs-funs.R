@@ -306,7 +306,8 @@ raxml_ng <- function(file,model,maxthreads,epsilon,verbose) {
 # MAKE TREE PLOTTING FUN
 ggtree_autoplot <- function(path,tb,scale.factor,width,hratio) {
     tr <- treeio::read.newick(path)
-    tr <- phangorn::midpoint(tr)
+    tr <- tr |> castor::root_in_edge(root_edge=which.max(tr$edge.length))
+    #tr <- phangorn::midpoint(tr)
     tree.length <- max(castor::get_all_distances_to_root(tr)) + (max(castor::get_all_distances_to_root(tr)) * width)
         p <- ggtree(tr, ladderize=TRUE,right=TRUE,size=0.7) %<+% tb
         pp <- p + geom_tiplab(offset=0,aes(label=tiplabel),align=FALSE,size=4) +
