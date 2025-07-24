@@ -181,7 +181,9 @@ The `tree-plot.R` script uses the ggtree R package to plot the trees as PDF. It 
 # flag '-s' [proportion] is tree scaling factor (multiplicative)
 #    bigger scaling factors are required for bigger trees
 #    experiment with this to get the tree plotted suitably on the page
-scripts/tree-plot.R -w 0.6 -h 0.5 -s 1
+# flag '-c' [colour] chooses how the tip symbols are coloured by
+#    options are 'species' (also prints accession), 'genus', 'family' 
+scripts/tree-plot.R -w 0.6 -h 0.5 -s 1 -c genus
 ```
 
 
