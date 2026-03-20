@@ -116,7 +116,7 @@ scripts/annotate-ncbi.R -t 1 -c fishbase
 
 ##### filter-species.R
 
-The `filter-species.R` cleans up the species names and picks the longest sequence for each of the loci. The script also allows you to choose how many elements are in the species names (based on spaces), which is important if dealing with subspecies or undescribed species. For example "Akysis sp. INHS 93579" would be cut down to "Akysis sp.INHS" with '-n 2' and "Akysis sp.INHS 93579" with '-n 3'. If you don't care about lumping subspecies or undescribed species, then use '-n 2'. Check the `ncbi-clean.csv` table to see how names have been edited. The script can also exclude sequences that you do not want using the `assets/exclusions.csv`. Just add any sequences to this file and they are automatically removed next time the script is run. Use the `ncbi-clean.csv` table to get the accession numbers. 
+The `filter-species.R` cleans up the species names and picks the longest sequence for each of the loci, and can also perform this step on just the outgroup species with the '-o' option. The script also allows you to choose how many elements are in the species names (based on spaces), which is important if dealing with subspecies or undescribed species. For example "Akysis sp. INHS 93579" would be cut down to "Akysis sp.INHS" with '-n 2' and "Akysis sp.INHS 93579" with '-n 3'. If you don't care about lumping subspecies or undescribed species, then use '-n 2'. Check the `ncbi-clean.csv` table to see how names have been edited. The script can also exclude sequences that you do not want using the `assets/exclusions.csv`. Just add any sequences to this file and they are automatically removed next time the script is run. Use the `ncbi-clean.csv` table to get the accession numbers.
 
 ```bash
 # flag '-n' [integer] is the length of the number of elements in the species name (delimited by spaces)
@@ -126,7 +126,11 @@ The `filter-species.R` cleans up the species names and picks the longest sequenc
 # flag '-i' [logical] is the flag for individual (population level) or species level output
 #    '-i false' will produce one sequence per species
 #    '-i true' will produce all sequences per species
-scripts/filter-species.R -n 3 -i false
+# flag '-o' [logical] will collapse just the inferred outgroup species down to a single sequence independently of '-i'
+#    outgroup is inferred if a single species is searched for 
+#    '-o true' will prune the inferred outgroup to one sequence
+#    '-o false' will keep all outgroup sequences
+scripts/filter-species.R -n 3 -i false -o false
 ```
 
 
@@ -182,7 +186,7 @@ The `tree-plot.R` script uses the ggtree R package to plot the trees as PDF. It 
 #    bigger scaling factors are required for bigger trees
 #    experiment with this to get the tree plotted suitably on the page
 # flag '-c' [colour] chooses how the tip symbols are coloured by
-#    options are 'species' (also prints accession), 'genus', 'family' 
+#    options are 'species' (also prints accession), 'genus', 'family', 'country' (with accesion and species) 
 scripts/tree-plot.R -w 0.6 -h 0.5 -s 1 -c genus
 ```
 

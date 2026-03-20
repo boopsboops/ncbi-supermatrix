@@ -23,6 +23,11 @@ option_list <- list(
 # set args
 opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 
+# if an underscore then write out as an outgroup
+if(str_detect(opt$clade,"_")) {
+    writeLines(opt$clade, here(today.dir,"outgroup.txt"))
+}
+
 # edit clade to remove underscore
 opt$clade <- str_replace_all(opt$clade,"_"," ")
 
