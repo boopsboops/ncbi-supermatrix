@@ -81,7 +81,7 @@ entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry) {
     x <- mapply(function(x) entrez_fetch_parallel(webhist=es.post,chunks=x,file=fasout), x=query.split,SIMPLIFY=TRUE,USE.NAMES=FALSE)
     es.fas <- ape::read.FASTA(fasout)
     writeLines(paste("\nDone!",length(es.fas),"sequences downloaded in FASTA format.\n"))
-    return(es.res)
+    return(es.fas)
 }
 
 
