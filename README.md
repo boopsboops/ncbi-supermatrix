@@ -31,7 +31,7 @@ Unpredictable results may occur when running scripts repeatedly with different s
 
 #### download-sequences.R
 
-With the `download-sequences.R` script we search for our clade of interest (catfishes family Akysidae), and an outgroup (_Amblyceps mangois_). Because the search is clade-based using taxonomic names, to add an outgroup we perform a second search and append the results to the previous one with the '-a' flag. To estimate an appropriate maximum download batch size we can make a dry run with the '-d' flag.
+With the `download-sequences.R` script we search for our clade of interest (catfishes family Akysidae), and an outgroup (_Amblyceps mangois_). Because the search is clade-based using taxonomic names, to add an outgroup we perform a second search and append the results to the previous one with the '-a' flag. Large sequence downloads can be batched into smaller jobs with the '-b' flag. Batch size can be automatically estimated using '-b 0'. Finer control can be achieved by setting your own batch value. To estimate an appropriate maximum download batch size we can make a dry run with the '-d' flag and obtain the number of hits.
 
 ```bash
 # flag '-c' [character] is the clade of interest
@@ -41,22 +41,19 @@ With the `download-sequences.R` script we search for our clade of interest (catf
 #    about 400-500 is best for Sanger-sequenced markers
 # flag '-x' [integer] is the maximum length of the sequence searched for (bp)
 #    about 1500-2500 is best for Sanger-sequenced markers
-# flag '-b' [integer] is the maximum batch size of sequences to download from NCBI Entrez
+# flag '-b' [integer] is the maximum batch size of sequences to download from NCBI Entrez in one job
 #    a batch size of 100 will divide the sequences in batches of < 100 
 #    this number must be smaller than the number of hits, but no larger than 9999
+#    setting '-b 0' will automatically estimate batch size 
 # flag '-a' [logical] toggles appending of data onto a previous file
 #    use this to perform multiple searches, e.g. for outgroups
 #    the 'false' option will overwrite previous files, while 'true' will add data
 # flag '-d' [logical] is the dry run option that does not download any sequence data
-#    use this to estimate the batch size
+#    use this to estimate the custom batch size
 
-# perform the dry runs with '-d' to estimate batch size
-scripts/download-sequences.R -c Akysidae -n 500 -x 2500 -b 1 -a false -d true
-scripts/download-sequences.R -c Amblyceps_mangois -n 500 -x 2500 -b 1 -a false -d true
-
-# now download the sequence data, setting maximum batch size to 30 and appending our outgroup Amblyceps mangois 
-scripts/download-sequences.R -c Akysidae -n 500 -x 2500 -b 30 -a false -d false
-scripts/download-sequences.R -c Amblyceps_mangois -n 500 -x 2500 -b 30 -a true -d false
+# automatically estimate batch size and download sequences 
+scripts/download-sequences.R -c Akysidae -n 500 -x 2500 -b 0 -a false -d false
+scripts/download-sequences.R -c Amblyceps_mangois -n 500 -x 2500 -b 0 -a true -d false
 ```
 
 

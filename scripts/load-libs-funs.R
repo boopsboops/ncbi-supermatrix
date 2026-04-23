@@ -63,14 +63,25 @@ entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry) {
     if (dry=="true") {stop(glue("\rInformation: The number of hits for this search is {es.res$count}. Ensure that your batch size '-b' is lower than this value (but no larger than 9,999).\n",.trim=FALSE),call.=FALSE)}
     if (rtm > es.res$count) {stop(glue("\nError! Batch size value ({rtm}) is larger than number of hits ({es.res$count}). Please use a smaller '-b' value.\n",.trim=FALSE))}
     writeLines(paste("\nNCBI search reports",length(es.res$ids),"hits for",clade,"...\n"))
+    if (es.res$count==0) {stop(glue("\rInformation: The number of hits for this search is {es.res$count}. Nothing to download.\n",.trim=FALSE),call.=FALSE)}
     if (length(es.res$ids) > 999999) {stop("\nError! You have more hits than can be downloaded. Please break up the search into seperate clades.\n")}
     es.post <- entrez_post(db="nucleotide",web_history=es.res$web_history)
-    query.split <- split(0:es.res$count,cut(0:es.res$count,ceiling(es.res$count/rtm),labels=FALSE))
+    if (rtm==0 & es.res$count >= 100) {
+        query.split <- split(0:es.res$count,cut(0:es.res$count,ceiling(es.res$count/(es.res$count-1)),labels=FALSE))
+    }
+    if (rtm==0 & es.res$count > 1 & es.res$count <100) {
+        query.split <- list(0:es.res$count)
+    }
+    if (rtm==0 & es.res$count == 1) {
+        query.split <- list(0)
+    }
+    if (rtm>0) {
+        query.split <- split(0:es.res$count,cut(0:es.res$count,ceiling(es.res$count/rtm),labels=FALSE))
+    }
     x <- mapply(function(x) entrez_fetch_parallel(webhist=es.post,chunks=x,file=fasout), x=query.split,SIMPLIFY=TRUE,USE.NAMES=FALSE)
     es.fas <- ape::read.FASTA(fasout)
-    #if (length(es.fas) != es.res$count) {stop("Error! Not all sequences were downloaded. Please try again.")}
     writeLines(paste("\nDone!",length(es.fas),"sequences downloaded in FASTA format.\n"))
-    return(es.fas)
+    return(es.res)
 }
 
 
