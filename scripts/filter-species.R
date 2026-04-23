@@ -10,13 +10,16 @@ writeLines("Filtering sequence data ...\n")
 # get args
 option_list <- list( 
     make_option(c("-n","--names"), type="numeric"),
-    make_option(c("-i","--indiv"), type="character")
+    make_option(c("-i","--indiv"), type="character"),
+    make_option(c("-o","--outgroup"), type="character")
     )
 
 # set args
 opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt <- NULL
 #opt$names <- 2
+#opt$indiv <- "true"
+#opt$outgroup <- "true"
 
 ##### LOAD DATA #####
 
@@ -26,6 +29,10 @@ writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FAL
 ncbi.raw <- read_csv(here(today.dir,"ncbi-raw.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 excl <- read_csv(here("assets/exclusions.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
+# og
+if(file.exists(here(today.dir,"outgroup.txt"))) {
+    og <- readLines(here(today.dir,"outgroup.txt"), warn=FALSE)
+}
 
 ##### CLEAN AND REMOVE UNWANTED SEQUENCES #####
 
@@ -39,6 +46,22 @@ ncbi.clean.excl <- ncbi.clean |> filter(!gbAccession %in% pull(excl,acc))
 # count drops and report
 ndrop <- nrow(ncbi.clean) - nrow(ncbi.clean.excl)
 #writeLines(glue("\nA total of {ndrop} sequence(s) have been excluded after filtering with 'assets/exclusions.csv'.\n",.trim=FALSE))
+
+
+##### FILTER FOR LONGEST SINGLE OUTGROUP #####
+
+if(opt$outgroup == "true") {
+    # filter by outgroup
+    cli::cli_alert_info("Filtering outgroup to one indiv.")
+    ncbi.clean.excl <- bind_rows(
+        ncbi.clean.excl |> filter(scientificName == og) |> slice_max(length,n=1,with_ties=FALSE),
+        ncbi.clean.excl |> filter(scientificName != og)
+    )
+    } else if(opt$outgroup=="false") {
+    # or do nothing
+    ncbi.clean.excl <- ncbi.clean.excl
+    } else {stop(writeLines("Error! the '-o' flag must be 'true' or 'false'."))
+}
 
 
 ##### FILTER FOR LONGEST ONE INDIV PER SP #####

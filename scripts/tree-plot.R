@@ -46,6 +46,18 @@ if(opt$colour == "genus") {
 if(opt$colour == "species") {
     ncbi.clean.tips <- ncbi.clean |> distinct(gbAccession,scientificName,genus,family) |> mutate(tiplabel=glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")) |> mutate(tip.colour=scientificName)
 }
+if(opt$colour == "country") {
+    ncbi.clean.tips <- ncbi.clean |> 
+        distinct(gbAccession,scientificName,genus,family,country) |> 
+        mutate(
+            tiplabel=if_else(
+                !is.na(country),
+                glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')} | {str_replace_all(country,': .+','')}"), 
+                glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")
+                )
+            ) |> 
+        mutate(tip.colour=scientificName)
+}
 
 # fun plot function over all trees
 purrr::walk(tree.files, \(x) ggtree_autoplot(path=x,tb=ncbi.clean.tips,scale.factor=opt$scalefactor,width=opt$width,hratio=opt$hratio))
