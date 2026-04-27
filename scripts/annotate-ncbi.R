@@ -27,7 +27,8 @@ option_list <- list(
 # set args
 #opt <- NULL
 opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
-cores <- opt$threads
+#cores <- opt$threads
+#opt <- NULL
 #opt$threads <- 1
 #opt$classification <- "fishbase"
 
@@ -86,11 +87,11 @@ if (opt$classification=="ncbi") {
     fb.gens <- ncbi_annotate(genera=list.gens) 
     } else if (opt$classification=="fishbase") {
     # FISHBASE #
-    writeLines(glue("Using FishBase taxonomy version {rfishbase::available_releases()[1]}."))
+    writeLines(glue("Using FishBase taxonomy version {sort(rfishbase::available_releases(),decreasing=TRUE)[1]}."))
     # get fb table
     fb.gens <- fishbase_annotate(genera=list.gens)
     # close connections
-    rfishbase::db_disconnect()
+    #rfishbase::db_disconnect()
     # stop
 } else stop(writeLines("Error! The '-c' flag must be either 'ncbi' or 'fishbase'."))
 
