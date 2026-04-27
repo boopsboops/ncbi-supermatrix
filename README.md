@@ -183,7 +183,8 @@ The `tree-plot.R` script uses the ggtree R package to plot the trees as PDF. It 
 #    bigger scaling factors are required for bigger trees
 #    experiment with this to get the tree plotted suitably on the page
 # flag '-c' [colour] chooses how the tip symbols are coloured by
-#    options are 'species' (also prints accession), 'genus', 'family', 'country' (with accesion and species) 
+#    only available for multigene species level analysis: 'genus', 'family' 
+#    only available for population analysis (single gene): 'species' (also prints accession), 'country' (with accesion and species)
 scripts/tree-plot.R -w 0.6 -h 0.5 -s 1 -c genus
 ```
 
