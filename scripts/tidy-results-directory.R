@@ -11,7 +11,7 @@ writeLines("Cleaning and tidying directory ...\n")
 ##### LOAD DATA #####
 
 # get latest dir
-today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
+today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
 writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 
 # list files

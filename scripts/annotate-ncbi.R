@@ -10,7 +10,7 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # get latest dir
-today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
+today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
 writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 #today.dir <- here("temp",paste0("Results_",Sys.Date()))
 #if(!dir.exists(today.dir)) {dir.create(today.dir,recursive=TRUE)}

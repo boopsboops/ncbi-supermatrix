@@ -26,7 +26,7 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 ##### LOAD DATA #####
 
 # get latest dir
-today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
+today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
 writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 

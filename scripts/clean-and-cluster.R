@@ -20,7 +20,7 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt$minclust <- 2
 
 # get latest dir
-today.dir <- sort(list.dirs(here("temp"),recursive=FALSE),decreasing=TRUE)[1]
+today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
 fas.in <- here(today.dir,"genbank-dump.fasta")
 
 # dereplicate
