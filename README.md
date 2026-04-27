@@ -127,7 +127,7 @@ The `filter-species.R` cleans up the species names and picks the longest sequenc
 #    outgroup is inferred if a single species is searched for 
 #    '-o true' will prune the inferred outgroup to one sequence
 #    '-o false' will keep all outgroup sequences
-scripts/filter-species.R -n 3 -i false -o false
+scripts/filter-species.R -n 3 -i false -o true
 ```
 
 
