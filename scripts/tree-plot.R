@@ -16,7 +16,7 @@ option_list <- list(
     )
 
 # set args
-opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
+opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt <- NULL
 #opt$scalefactor <- 1
 #opt$hratio <- 0.5
@@ -27,8 +27,8 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
-ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
+writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+ncbi.clean <- readr::read_csv(here::here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 # list trees
 tree.files <- list.files(today.dir,pattern="*.fasta.raxml.bestTree$",recursive=FALSE,full.names=TRUE)
@@ -38,30 +38,30 @@ tree.files <- list.files(today.dir,pattern="*.fasta.raxml.bestTree$",recursive=F
 
 # make tip labels for family, genus, species
 if(opt$colour == "family") {
-    ncbi.clean.tips <- ncbi.clean |> distinct(scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))  |> mutate(tip.colour=family)
+    ncbi.clean.tips <- ncbi.clean |> dplyr::distinct(scientificName,genus,family) |> dplyr::mutate(tiplabel=glue::glue("{family} | {str_replace_all(scientificName,'_',' ')}")) |> dplyr::mutate(tip.colour=family)
 }
 if(opt$colour == "genus") {
-    ncbi.clean.tips <- ncbi.clean |> distinct(scientificName,genus,family) |> mutate(tiplabel=glue("{family} | {str_replace_all(scientificName,'_',' ')}"))  |> mutate(tip.colour=genus)
+    ncbi.clean.tips <- ncbi.clean |> dplyr::distinct(scientificName,genus,family) |> dplyr::mutate(tiplabel=glue::glue("{family} | {str_replace_all(scientificName,'_',' ')}")) |> dplyr::mutate(tip.colour=genus)
 }
 if(opt$colour == "species") {
-    ncbi.clean.tips <- ncbi.clean |> distinct(gbAccession,scientificName,genus,family) |> mutate(tiplabel=glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")) |> mutate(tip.colour=scientificName)
+    ncbi.clean.tips <- ncbi.clean |> dplyr::distinct(gbAccession,scientificName,genus,family) |> dplyr::mutate(tiplabel=glue::glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")) |> dplyr::mutate(tip.colour=scientificName)
 }
 if(opt$colour == "country") {
     ncbi.clean.tips <- ncbi.clean |> 
-        distinct(gbAccession,scientificName,genus,family,country) |> 
-        mutate(
-            tiplabel=if_else(
+        dplyr::distinct(gbAccession,scientificName,genus,family,country) |> 
+        dplyr::mutate(
+            tiplabel=dplyr::if_else(
                 !is.na(country),
-                glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')} | {str_replace_all(country,': .+','')}"), 
-                glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")
+                glue::glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')} | {str_replace_all(country,': .+','')}"), 
+                glue::glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")
                 )
             ) |> 
-        mutate(tip.colour=scientificName)
+        dplyr::mutate(tip.colour=scientificName)
 }
 
 # fun plot function over all trees
 purrr::walk(tree.files, \(x) ggtree_autoplot(path=x,tb=ncbi.clean.tips,scale.factor=opt$scalefactor,width=opt$width,hratio=opt$hratio))
 
 # print
-writeLines(glue("\nTrees written to:\n",.trim=FALSE))
-writeLines(glue("{basename(tree.files)}.pdf\n",.trim=FALSE))
+writeLines(glue::glue("\nTrees written to:\n",.trim=FALSE))
+writeLines(glue::glue("{basename(tree.files)}.pdf\n",.trim=FALSE))

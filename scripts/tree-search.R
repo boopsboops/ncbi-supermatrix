@@ -16,7 +16,7 @@ option_list <- list(
     )
 
 # set args
-opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
+opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt <- NULL
 #opt$threads <- 4
 #opt$model <- "TN93+G"
@@ -28,7 +28,7 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 #ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 # list fasta
@@ -56,7 +56,7 @@ purrr::walk(fasta.files.tree, \(x) raxml_ng(file=x,model=opt$model,maxthreads=op
 # print warning
 if(length(fasta.files.tree) < length(fasta.files)) {
     # get names of length <= 4 
-    fasta.files.err <- fasta.files[files.fas.length <= 4] |> basename() |> str_replace_all("\\.aligned\\.trimmed\\.fasta","")
+    fasta.files.err <- fasta.files[files.fas.length <= 4] |> basename() |> stringr::str_replace_all("\\.aligned\\.trimmed\\.fasta","")
     fasta.files.err.genes <- paste(fasta.files.err,collapse=", ")
-    writeLines(glue("\nWARNING! The following loci had < 5 individuals, so gene trees could not be computed for these: {fasta.files.err.genes}\n",.trim=FALSE))
+    writeLines(glue::glue("\nWARNING! The following loci had < 5 individuals, so gene trees could not be computed for these: {fasta.files.err.genes}\n",.trim=FALSE))
 }

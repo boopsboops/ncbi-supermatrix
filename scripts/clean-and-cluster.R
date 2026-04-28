@@ -15,13 +15,13 @@ option_list <- list(
     )
 
 # set args
-opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
+opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt <- NULL
 #opt$minclust <- 2
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-fas.in <- here(today.dir,"genbank-dump.fasta")
+fas.in <- here::here(today.dir,"genbank-dump.fasta")
 
 # dereplicate
 dereplicate_fasta(infile=fas.in,dereplicate=opt$derep)
@@ -33,28 +33,28 @@ filter_fasta(infile=fas.in,maxns=opt$maxns)
 cluster_fasta(infile=fas.in,identity=opt$clustprop)
 
 # load clusters
-clust.files <- list.files(here(today.dir),pattern="cluster\\.",full.names=TRUE)
+clust.files <- list.files(here::here(today.dir),pattern="cluster\\.",full.names=TRUE)
 
 # table of clusters
 clust.tab <- tibble::as_tibble(file.info(clust.files),rownames="path") |>
-    mutate(cluster=basename(path),size=size/1000) |> 
-    select(cluster,size,path) |> 
-    arrange(desc(size))
+    dplyr::mutate(cluster=basename(path),size=size/1000) |> 
+    dplyr::select(cluster,size,path) |> 
+    dplyr::arrange(desc(size))
 
 # add data
 clust.fas <- mapply(ape::read.FASTA,clust.files,USE.NAMES=TRUE,SIMPLIFY=TRUE)
 # add description
 first.acc <- mapply(function(x) labels(x)[[1]],clust.fas,USE.NAMES=TRUE,SIMPLIFY=TRUE)
-first.acc.tab <- tibble(cluster=basename(names(clust.fas)),facc=unname(first.acc))
+first.acc.tab <- tibble::tibble(cluster=basename(names(clust.fas)),facc=unname(first.acc))
 # add length
 clust.lens <- mapply(length,clust.fas,USE.NAMES=FALSE,SIMPLIFY=TRUE)
-clust.lens.tab <- tibble(cluster=basename(names(clust.fas)),nseqs=clust.lens)
+clust.lens.tab <- tibble::tibble(cluster=basename(names(clust.fas)),nseqs=clust.lens)
 
 # join
-all.clusters <- clust.tab |> left_join(first.acc.tab,by=join_by(cluster)) |> left_join(clust.lens.tab,by=join_by(cluster))
+all.clusters <- clust.tab |> dplyr::left_join(first.acc.tab,by=join_by(cluster)) |> dplyr::left_join(clust.lens.tab,by=join_by(cluster))
 
 # filter the clusters by minimum size and make vector
-all.clusters.red <- all.clusters |> filter(nseqs>=opt$minclust)
+all.clusters.red <- all.clusters |> dplyr::filter(nseqs>=opt$minclust)
 facc <- all.clusters.red |> dplyr::pull(facc)
 
 # chunk 200 should result in string of around 2200 chars
@@ -66,16 +66,16 @@ chunk.frag <- unname(split(facc, ceiling(seq_along(facc)/chunk)))
 
 # run chunk fun and combine
 ape.gb.list <- mapply(FUN=read_genbank,chunk.frag,SIMPLIFY=FALSE,USE.NAMES=FALSE)
-ape.gb <- bind_rows(ape.gb.list) |> mutate(description=str_split_fixed(description," ",2)[,2])
+ape.gb <- dplyr::bind_rows(ape.gb.list) |> dplyr::mutate(description=str_split_fixed(description," ",2)[,2])
 
 # final table
 all.clusters.desc <- all.clusters.red |> 
-    left_join(ape.gb,by=join_by(facc)) |> 
-    select(cluster,size,nseqs,description,facc,path) |>
-    arrange(desc(nseqs))
-write_csv(all.clusters.desc,file=here(today.dir,"clusters.csv"))
+    dplyr::left_join(ape.gb,by=join_by(facc)) |> 
+    dplyr::select(cluster,size,nseqs,description,facc,path) |>
+    dplyr::arrange(desc(nseqs))
+readr::write_csv(all.clusters.desc,file=here::here(today.dir,"clusters.csv"))
 
 # print and write out table
-writeLines(glue("\nTop 20 clusters with >={opt$minclust} sequences, including file size in kb, n sequences, and description of first sequence.\n",.trim=FALSE))
-writeLines(glue("\nTable written out to {here(today.dir,'clusters.csv')}"))
-all.clusters.desc |> slice_head(n=20) |> select(-path) |> knitr::kable()
+writeLines(glue::glue("\nTop 20 clusters with >={opt$minclust} sequences, including file size in kb, n sequences, and description of first sequence.\n",.trim=FALSE))
+writeLines(glue::glue("\nTable written out to {here(today.dir,'clusters.csv')}"))
+all.clusters.desc |> dplyr::slice_head(n=20) |> dplyr::select(-path) |> knitr::kable()

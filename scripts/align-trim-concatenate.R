@@ -15,7 +15,7 @@ option_list <- list(
     )
 
 # set args
-opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
+opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt <- NULL
 #opt$prop <- 0.2
 #opt$threads <- 4
@@ -25,14 +25,14 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
-ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
+writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+ncbi.clean <- readr::read_csv(here::here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 #### ALIGN AND TRIM FASTA #####
 
 # get gene names and paths
-genes <- ncbi.clean |> distinct(gene) |> pull()
-genes.files <- here(today.dir,glue("{genes}.fasta"))
+genes <- ncbi.clean |> dplyr::distinct(gene) |> pull()
+genes.files <- here::here(today.dir,glue::glue("{genes}.fasta"))
 
 # write out
 purrr::walk(genes, \(x) write_fasta(df=ncbi.clean,genez=x,dir=today.dir,pop=as.logical(opt$indiv)))
@@ -56,8 +56,8 @@ if(opt$indiv == "true") {
 ##### CONCATENATE AND WRITE OUT #####
  
 # read in with ape
-ali.files <- here(today.dir,glue("{genes}.aligned.trimmed.fasta"))
-ali.all <- purrr::map(ali.files, \(x) read.FASTA(file=x))
+ali.files <- here::here(today.dir,glue::glue("{genes}.aligned.trimmed.fasta"))
+ali.all <- purrr::map(ali.files, \(x) ape::read.FASTA(file=x))
 
 # convert to matrix
 ali.all.mat <- purrr::map(ali.all, as.matrix)
@@ -66,15 +66,15 @@ ali.all.mat <- purrr::map(ali.all, as.matrix)
 genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat,fill.with.gaps=TRUE)))
 
 # write out
-genes.concat |> write.FASTA(file=here(today.dir,"concatenated.aligned.trimmed.fasta"))
-genes.concat |> write.dna(file=here(today.dir,"concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
-genes.concat |> write.nexus.data(file=here(today.dir,"concatenated.aligned.trimmed.nex"),interleaved=FALSE)
+genes.concat |> ape::write.FASTA(file=here::here(today.dir,"concatenated.aligned.trimmed.fasta"))
+genes.concat |> ape::write.dna(file=here::here(today.dir,"concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
+genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"concatenated.aligned.trimmed.nex"),interleaved=FALSE)
 
 # make partion file and write out
-partition_table(mat=ali.all.mat) |> write_tsv(here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
+partition_table(mat=ali.all.mat) |> readr::write_tsv(here::here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
 
 # file
-writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.fasta'.",.trim=FALSE))
-writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.nex'.",.trim=FALSE))
-writeLines(glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.phy'.",.trim=FALSE))
-writeLines(glue("\nRAxML partitions file written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.parts'.\n",.trim=FALSE))
+writeLines(glue::glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.fasta'.",.trim=FALSE))
+writeLines(glue::glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.nex'.",.trim=FALSE))
+writeLines(glue::glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.phy'.",.trim=FALSE))
+writeLines(glue::glue("\nRAxML partitions file written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.parts'.\n",.trim=FALSE))
