@@ -14,6 +14,7 @@ conda env create -f conda.yaml
 conda activate ncbi-supermatrix
 
 # important! need to spoof some symlinks for shared libs to keep R and conda happy
+ln -s $CONDA_PREFIX/include/freetype2/ft2build.h $CONDA_PREFIX/include/ft2build.h
 ln -s $CONDA_PREFIX/include/freetype2/freetype $CONDA_PREFIX/include/freetype
 ln -s $CONDA_PREFIX/include/cairo/* $CONDA_PREFIX/include/
 

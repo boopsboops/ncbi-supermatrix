@@ -47,5 +47,6 @@ dependencies:
   - trimal
 
 # fixing issues with shared libs
+#ln -s $CONDA_PREFIX/include/freetype2/ft2build.h $CONDA_PREFIX/include/ft2build.h
 #ln -s $CONDA_PREFIX/include/freetype2/freetype $CONDA_PREFIX/include/freetype
 #ln -s $CONDA_PREFIX/include/cairo/* $CONDA_PREFIX/include/
