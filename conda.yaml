@@ -1,0 +1,51 @@
+name: ncbi-supermatrix
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - r-base=4.5.3
+
+# system libs
+  - libcurl
+  - openssl
+  - libxml2
+  - make
+  - compilers
+  - zlib
+  - bzip2
+  - readline
+  - sqlite 
+  - wget
+  - curl
+  - llvm
+  - ncurses
+  - xz
+  - tk
+  - libxml2
+  - libffi
+  - pkg-config
+  - cmake
+  - cairo
+  - fontconfig
+  - freetype
+  - glpk
+  - icu
+  - libpng
+  - libxml2
+  - libxml2-devel
+  - pandoc
+  - harfbuzz
+  - fribidi
+
+# phylo software 
+  - vsearch
+  - raxml-ng
+  - mafft
+  - trimal
+
+# fixing issues with shared libs
+#ln -s $CONDA_PREFIX/include/freetype2/freetype $CONDA_PREFIX/include/freetype
+#ln -s $CONDA_PREFIX/include/cairo/* $CONDA_PREFIX/include/
