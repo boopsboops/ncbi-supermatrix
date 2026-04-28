@@ -196,12 +196,22 @@ splitter <- function(x,n) {
     splitz3 <- splitz[,3]
     splitz4 <- splitz[,4]
     splitz5 <- splitz[,5]
-    gstring <- case_when(
-        n==2 ~ glue("{splitz1}_{splitz2}"),
-        n==3 ~ glue("{splitz1}_{splitz2}_{splitz3}"),
-        n==4 ~ glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}"),
-        n==5 ~ glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}_{splitz5}")
-        )
+    gstring <- if (n == 2) {
+            glue::glue("{splitz1}_{splitz2}")
+        } else if (n == 3) {
+            glue::glue("{splitz1}_{splitz2}_{splitz3}")
+        } else if (n == 4) {
+            glue::glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}")
+        } else if (n == 5) {
+            glue::glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}_{splitz5}")
+        } else {stop("Error! Names value must be between 2 and 5.")
+        }
+#    gstring <- case_when(
+#        n==2 ~ glue("{splitz1}_{splitz2}"),
+#        n==3 ~ glue("{splitz1}_{splitz2}_{splitz3}"),
+#        n==4 ~ glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}"),
+#        n==5 ~ glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}_{splitz5}")
+#        )
     return(gstring)
 }
 
@@ -220,14 +230,19 @@ clean_names <- function(df,n) {
         mutate(label=str_replace_all(label,"aff\\._","aff.")) |>
         mutate(label=str_replace_all(label,"sp\\._","sp.")) |>
         mutate(elements=str_count(label,"_")+1) |>
-        mutate(label=case_when(
-            n == 2 ~ splitter(label,n=2),
-            n == 3 ~ splitter(label,n=3),
-            n == 4 ~ splitter(label,n=4),
-            n == 5 ~ splitter(label,n=5),
-            #str_detect(label,"cf\\.") ~ splitter(label,n=3),
-            #elements > 4 ~ splitter(label,n=5)
-            )) |>
+#        mutate(label=case_when(
+#            n == 2 ~ splitter(label,n=2),
+#            n == 3 ~ splitter(label,n=3),
+#            n == 4 ~ splitter(label,n=4),
+#            n == 5 ~ splitter(label,n=5),
+#            )) |>
+mutate(label=
+    if (n == 2) {splitter(label,n=2)} 
+    else if (n == 3) {splitter(label,n=3)}
+    else if (n == 4) {splitter(label,n=4)}
+    else if (n == 5) {splitter(label,n=5)}
+    else {stop(writeLines("Error! Names value must be between 2 and 5."))}
+) |>
         mutate(label=as.character(label)) |>
         mutate(label=str_replace_all(label,"_+$","")) |>
         mutate(scientificName=label) |>
@@ -320,7 +335,7 @@ ggtree_autoplot <- function(path,tb,scale.factor,width,hratio) {
     tr <- tr |> castor::root_in_edge(root_edge=which.max(tr$edge.length))
     #tr <- phangorn::midpoint(tr)
     tree.length <- max(castor::get_all_distances_to_root(tr)) + (max(castor::get_all_distances_to_root(tr)) * width)
-        p <- ggtree(tr, ladderize=TRUE,right=TRUE,size=0.7) %<+% tb
+        p <- ggtree(tr, ladderize=TRUE,right=TRUE,linewidth=0.7) %<+% tb
         pp <- p + geom_tiplab(offset=0,aes(label=tiplabel),align=FALSE,size=4) +
         geom_tippoint(aes(color=tip.colour),size=2.5) +
         theme(legend.position="none") +
