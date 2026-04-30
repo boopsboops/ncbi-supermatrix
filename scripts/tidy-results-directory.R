@@ -5,14 +5,16 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("Cleaning and tidying directory ...\n")
+#writeLines("Cleaning and tidying directory ...\n")
+cli_report(txt="Running 'tidy-results-directory.R' ... Cleaning and tidying directory ...",rule=FALSE,alert="info")
 
 
 ##### LOAD DATA #####
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+#writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Working in directory 'temp/{basename(today.dir)}'."),rule=FALSE,alert="info")
 
 # list files
 all.files <- list.files(today.dir,recursive=FALSE,full.names=TRUE)
@@ -44,8 +46,10 @@ if (file.exists(here("TRUE"))) {invisible(file.remove(here("TRUE")))}
 
 ##### REPORT #####
 
-writeLines(glue::glue("All Newick tree files have been moved to 'temp/{basename(today.dir)}/trees'.\n",.trim=FALSE))
-writeLines(glue::glue("All PDF tree files have been moved to 'temp/{basename(today.dir)}/pdf'.\n",.trim=FALSE))
-writeLines(glue::glue("All final alignment files have been moved to 'temp/{basename(today.dir)}/alignments'.\n",.trim=FALSE))
-writeLines(glue::glue("All metadata files have been moved to 'temp/{basename(today.dir)}/metadata'.\n",.trim=FALSE))
-writeLines(glue::glue("A backup of all intermediate and final files have been moved to 'temp/{basename(today.dir)}/backup'.\n",.trim=FALSE))
+writeLines(glue::glue("All Newick tree files have been moved to 'temp/{basename(today.dir)}/trees'.",.trim=FALSE))
+writeLines(glue::glue("All PDF tree files have been moved to 'temp/{basename(today.dir)}/pdf'.",.trim=FALSE))
+writeLines(glue::glue("All final alignment files have been moved to 'temp/{basename(today.dir)}/alignments'.",.trim=FALSE))
+writeLines(glue::glue("All metadata files have been moved to 'temp/{basename(today.dir)}/metadata'.",.trim=FALSE))
+writeLines(glue::glue("A backup of all intermediate and final files have been moved to 'temp/{basename(today.dir)}/backup'.",.trim=FALSE))
+
+cli_report(txt="Directory tidying completed.",rule=TRUE,alert="success")

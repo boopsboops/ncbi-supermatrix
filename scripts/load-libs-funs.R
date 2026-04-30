@@ -31,7 +31,8 @@ read_genbank <- function(accs) {
     Sys.sleep(1)
     gb.accs <- ape::read.GenBank(accs)
     gb.accs.tib <- tibble::tibble(facc=labels(gb.accs),description=attr(gb.accs,"description"))
-    writeLines(glue("Cluster information downloaded for {length(accs)} hits."))
+    #writeLines(glue("Cluster information downloaded for {length(accs)} hits."))
+    cli_report(txt=glue::glue("Cluster information downloaded for {length(accs)} hits."),rule=FALSE,alert="info")
     return(gb.accs.tib)
 }
 
@@ -41,7 +42,8 @@ entrez_fetch_parallel <- function(webhist,chunks,file) {
     chunk.first <- dplyr::first(chunks)
     chunk.last <- dplyr::last(chunks)
     chunk.len <- length(chunks)
-    writeLines(paste0("Downloading hits ",chunk.first," to ",chunk.last," from NCBI ..."))
+    cli_report(txt=glue::glue("Downloading hits {chunk.first} to {chunk.last} from NCBI ..."),rule=FALSE,alert="info")
+    #writeLines(paste0("Downloading hits ",chunk.first," to ",chunk.last," from NCBI ..."))
     fetch.fas <- rentrez::entrez_fetch(db="nucleotide",rettype="fasta",web_history=webhist,retstart=chunk.first,retmax=chunk.len)
     write(fetch.fas,file=file,append=TRUE)
     Sys.sleep(3)
@@ -55,16 +57,17 @@ entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry) {
         file.create(fasout,overwrite=TRUE)
     } else if (append=="true") {
         Sys.sleep(1)
-    } else stop("\nError! the append flag '-a' must be 'true' or 'false'.\n")
+    } else stop(cli::cli_alert_danger("ERROR The append flag '-a' must be 'true' or 'false'."))
     rtm <- as.integer(batchsize)
     nots <- glue::glue("NOT \"PREDICTED\"[All Fields] NOT \"UNVERIFIED\"[All Fields] NOT \"microsatellite\"[All Fields] NOT \"pseudogene\"[All Fields] NOT \"genomic survey sequence\"[All Fields]")# NOT \"transcribed\"[All Fields] NOT \"cDNA\"[All Fields]  NOT \"mRNA\"[All Fields] NOT \"whole genome shotgun sequence\"[All Fields]
-    if (rtm > 9999) {stop("\nError! Batch size can be no larger than 9,999.\n")}
+    if (rtm > 9999) {stop(cli::cli_alert_danger("ERROR Batch size can be no larger than 9,999."))}
     es.res <- rentrez::entrez_search(db="nucleotide",term=glue::glue("(\"{clade}\"[ORGANISM] AND {minlen}:{maxlen}[SLEN]) {nots}"),retmax=999999,use_history=TRUE)
-    if (dry=="true") {stop(glue::glue("\rInformation: The number of hits for this search is {es.res$count}. Ensure that your batch size '-b' is lower than this value (but no larger than 9,999).\n",.trim=FALSE),call.=FALSE)}
-    if (rtm > es.res$count) {stop(glue::glue("\nError! Batch size value ({rtm}) is larger than number of hits ({es.res$count}). Please use a smaller '-b' value.\n",.trim=FALSE))}
-    writeLines(paste("\nNCBI search reports",length(es.res$ids),"hits for",clade,"...\n"))
-    if (es.res$count==0) {stop(glue::glue("\rInformation: The number of hits for this search is {es.res$count}. Nothing to download.\n",.trim=FALSE),call.=FALSE)}
-    if (length(es.res$ids) > 999999) {stop("\nError! You have more hits than can be downloaded. Please break up the search into seperate clades.\n")}
+    if (dry=="true") {stop(cli_report(txt=glue::glue("Information: The number of hits for this search is {es.res$count}. Ensure that your batch size '-b' is lower than this value (but no larger than 9,999)."),rule=FALSE,alert="info"),call.=FALSE)}
+    if (rtm > es.res$count) {stop(cli::cli_alert_danger(glue::glue("Error! Batch size value ({rtm}) is larger than number of hits ({es.res$count}). Please use a smaller '-b' value.")))}
+    cli_report(txt=glue::glue("NCBI search reports {length(es.res$ids)} hits for {clade}."),rule=FALSE,alert="info")
+    #writeLines(paste("\nNCBI search reports",length(es.res$ids),"hits for",clade,"...\n"))
+    if (es.res$count==0) {stop(cli::cli_alert_danger(glue::glue("Information: The number of hits for this search is {es.res$count}. Nothing to download.")),call.=FALSE)}
+    if (length(es.res$ids) > 999999) {stop(cli::cli_alert_danger("ERROR You have more hits than can be downloaded. Please break up the search into seperate clades."))}
     es.post <- rentrez::entrez_post(db="nucleotide",web_history=es.res$web_history)
     if (rtm==0 & es.res$count >= 100) {
         query.split <- split(0:es.res$count,cut(0:es.res$count,ceiling(es.res$count/(es.res$count-1)),labels=FALSE))
@@ -80,7 +83,8 @@ entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry) {
     }
     x <- mapply(function(x) entrez_fetch_parallel(webhist=es.post,chunks=x,file=fasout), x=query.split,SIMPLIFY=TRUE,USE.NAMES=FALSE)
     es.fas <- ape::read.FASTA(fasout)
-    writeLines(paste("\nDone!",length(es.fas),"sequences downloaded in FASTA format.\n"))
+    #writeLines(paste("\nDone!",length(es.fas),"sequences downloaded in FASTA format.\n"))
+    cli_report(txt=glue::glue("n={length(es.fas)} sequences downloaded in FASTA format."),rule=FALSE,alert="info")
     return(es.fas)
 }
 
@@ -100,10 +104,11 @@ ncbi_byid_parallel <- function(accs){
         ncbi.tab <- ncbi.tab
     }
     if(class(ncbi.tab)!="data.frame") {
-        stop(writeLines("Searches failed ... aborted")) 
+        stop(cli::cli_alert_danger("ERROR Searches failed ... aborted.")) 
     } else {
         end_time <- Sys.time()
-        writeLines(paste0("Metadata for ",length(accs)," accessions downloaded (starting ",accs[1],"). Download took ",round(as.numeric(end_time-start_time),digits=2)," seconds."))
+        #writeLines(paste0("Metadata for ",length(accs)," accessions downloaded (starting ",accs[1],"). Download took ",round(as.numeric(end_time-start_time),digits=2)," seconds."))
+        cli_report(txt=glue::glue("Metadata for {length(accs)} accessions downloaded (starting {accs[1]}. Download took {round(as.numeric(end_time-start_time),digits=2)} seconds."),rule=FALSE,alert="success")
         return(ncbi.tab)
     }
 }
@@ -117,7 +122,7 @@ dereplicate_fasta <- function(infile,dereplicate) {
             system(exe.string)
         } else if (dereplicate=="false") {
             file.copy(infile,outfile)
-        } else stop("\nError! the dereplicate flag '-d' must be 'true' or 'false'.\n")
+        } else stop(cli::cli_alert_danger("ERROR the dereplicate flag '-d' must be 'true' or 'false'."))
 }
 
 
@@ -204,7 +209,7 @@ splitter <- function(x,n) {
             glue::glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}")
         } else if (n == 5) {
             glue::glue("{splitz1}_{splitz2}_{splitz3}_{splitz4}_{splitz5}")
-        } else {stop("Error! Names value must be between 2 and 5.")
+        } else {stop(cli::cli_alert_danger("ERROR Names value must be between 2 and 5."))
         }
 #    gstring <- case_when(
 #        n==2 ~ glue("{splitz1}_{splitz2}"),
@@ -241,7 +246,7 @@ mutate(label=
     else if (n == 3) {splitter(label,n=3)}
     else if (n == 4) {splitter(label,n=4)}
     else if (n == 5) {splitter(label,n=5)}
-    else {stop(writeLines("Error! Names value must be between 2 and 5."))}
+    else {stop(cli::cli_alert_danger("ERROR Names value must be between 2 and 5."))}
 ) |>
         dplyr::mutate(label=as.character(label)) |>
         dplyr::mutate(label=stringr::str_replace_all(label,"_+$","")) |>
@@ -297,7 +302,9 @@ trim_fasta <- function(infile,prop) {
     outfile <- stringr::str_replace_all(infile,"\\.fasta",".trimmed.fasta")
     exe.string <- glue::glue("trimal -in {infile} -out {outfile} -gt {prop}")
     system(exe.string)
-    writeLines(glue::glue("\nAligned and trimmed fasta file written to '{basename(outfile)}'.\n",.trim=FALSE))
+    cli::cli_alert_info(glue::glue("Aligned and trimmed fasta gene file written to '{basename(outfile)}'."))
+    #cli_report(txt=glue::glue("Aligned and trimmed fasta file written to '{basename(outfile)}'."),rule=FALSE,alert="info")
+    #writeLines(glue::glue("\nAligned and trimmed fasta file written to '{basename(outfile)}'.\n",.trim=FALSE))
 }
 
 
@@ -322,9 +329,10 @@ raxml_ng <- function(file,model,maxthreads,epsilon,verbose) {
         system(command=string.search,ignore.stdout=FALSE)
         } else if (verbose == "false") {
         system(command=string.search,ignore.stdout=TRUE)
-        } else stop(writeLines("Error! the '-v' flag must be 'true' or 'false'."))
+        } else stop(cli::cli_alert_danger("ERROR the '-v' flag must be 'true' or 'false'."))
     rax.tr <- ape::read.tree(file=glue::glue("{file}.raxml.bestTree"))
-    writeLines(glue::glue("\nTree search completed for '{basename(file)}'.",.trim=FALSE))
+    cli::cli_alert_info(glue::glue("Tree search completed for '{basename(file)}'."))
+    #writeLines(glue::glue("\nTree search completed for '{basename(file)}'.",.trim=FALSE))
     return(rax.tr)
 }
 
@@ -344,5 +352,28 @@ ggtree_autoplot <- function(path,tb,scale.factor,width,hratio) {
 }
 
 
-# REPORT
-writeLines("\nPackages and functions loaded.\n")
+# MAKE A REPORTING FUNCTION
+cli_report <- function(txt,rule,alert) {
+    if(isTRUE(rule)) {
+        cli::cli_rule()
+            if(alert=="info") {
+                cli::cli_alert_info(txt) 
+            } else if(alert=="success") {
+                cli::cli_alert_success(txt)
+            }
+        cli::cli_rule()
+    } else if (isFALSE(rule)) {
+        cli::cli_text("")
+            if(alert=="info") {
+                cli::cli_alert_info(txt) 
+            } else if(alert=="success") {
+                cli::cli_alert_success(txt)
+            }
+        cli::cli_text("")
+    }
+}
+
+# report
+cli_report(txt="Packages and functions loaded.",rule=FALSE,alert="success")
+#writeLines("\nPackages and functions loaded.\n")
+

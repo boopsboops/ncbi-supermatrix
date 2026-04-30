@@ -8,7 +8,8 @@ today.dir <- here::here("temp",paste0("Results_",Sys.Date()))
 if(!dir.exists(today.dir)) {dir.create(today.dir,recursive=TRUE)}
 
 # info
-writeLines("\nSearching GenBank for sequence data ...\n")
+#writeLines("\nSearching GenBank for sequence data ...\n")
+cli_report(txt="Running 'download-sequences.R' ... Searching GenBank for sequence data ...",rule=FALSE,alert="info")
 
 # get args
 option_list <- list( 
@@ -36,3 +37,5 @@ seqs.fas <- entrez_download(clade=opt$clade,minlen=opt$minlen,maxlen=opt$maxlen,
 
 # remove annoying TRUE file
 if (file.exists(here::here("TRUE"))) {invisible(file.remove(here::here("TRUE")))}
+
+cli_report(txt="Sequence data download completed.",rule=TRUE,alert="success")

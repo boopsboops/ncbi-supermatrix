@@ -5,7 +5,8 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("Plotting phylogenetic trees ...\n")
+#writeLines("Plotting phylogenetic trees ...\n")
+cli_report(txt="Running 'tree-plot.R' ... Plotting phylogenetic trees ...",rule=FALSE,alert="info")
 
 # get args
 option_list <- list( 
@@ -27,7 +28,8 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_h
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Working in directory 'temp/{basename(today.dir)}'."),rule=FALSE,alert="info")
+#writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 ncbi.clean <- readr::read_csv(here::here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 # list trees
@@ -63,5 +65,6 @@ if(opt$colour == "country") {
 purrr::walk(tree.files, \(x) ggtree_autoplot(path=x,tb=ncbi.clean.tips,scale.factor=opt$scalefactor,width=opt$width,hratio=opt$hratio))
 
 # print
-writeLines(glue::glue("\nTrees written to:\n",.trim=FALSE))
-writeLines(glue::glue("{basename(tree.files)}.pdf\n",.trim=FALSE))
+cli_report(txt="Phylogenetic trees written to:",rule=FALSE,alert="info")
+writeLines(glue::glue("{basename(tree.files)}.pdf"))
+cli_report(txt="Phylogenetic tree plotting completed.",rule=TRUE,alert="success")

@@ -5,7 +5,8 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("Filtering sequence data ...\n")
+#writeLines("Filtering sequence data ...\n")
+cli_report(txt="Running 'filter-species.R' ... Filtering sequence data ...",rule=FALSE,alert="info")
 
 # get args
 option_list <- list( 
@@ -25,7 +26,8 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_h
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+#writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Working in directory 'temp/{basename(today.dir)}'."),rule=FALSE,alert="info")
 ncbi.raw <- readr::read_csv(here::here(today.dir,"ncbi-raw.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 excl <- readr::read_csv(here::here("assets/exclusions.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
@@ -52,7 +54,7 @@ ndrop <- nrow(ncbi.clean) - nrow(ncbi.clean.excl)
 
 if(opt$outgroup == "true") {
     # filter by outgroup
-    cli::cli_alert_info("Filtering outgroup to one indiv.")
+    cli_report(txt="Filtering outgroup to one indiv ...",rule=FALSE,alert="info")
     ncbi.clean.excl <- dplyr::bind_rows(
         ncbi.clean.excl |> dplyr::filter(scientificName == og) |> dplyr::slice_max(length,n=1,with_ties=FALSE),
         ncbi.clean.excl |> dplyr::filter(scientificName != og)
@@ -60,7 +62,7 @@ if(opt$outgroup == "true") {
     } else if(opt$outgroup=="false") {
     # or do nothing
     ncbi.clean.excl <- ncbi.clean.excl
-    } else {stop(writeLines("Error! the '-o' flag must be 'true' or 'false'."))
+    } else {stop(cli::cli_alert_danger("ERROR the '-o' flag must be 'true' or 'false'."))
 }
 
 
@@ -68,7 +70,7 @@ if(opt$outgroup == "true") {
 
 if(opt$indiv == "false") {
     # filter by species and sequence length
-    cli::cli_alert_info("Running in species mode.")
+    cli_report(txt="Running in species mode ...",rule=FALSE,alert="info")
     ncbi.clean.excl.filt <- ncbi.clean.excl |> 
         dplyr::group_by(gene,scientificName) |>
         dplyr::slice_max(order_by=length,with_ties=FALSE,n=1) |>
@@ -76,9 +78,9 @@ if(opt$indiv == "false") {
         dplyr::arrange(scientificName,gene)
     } else if(opt$indiv == "true") {
     # or do nothing if pop
-    cli::cli_alert_info("Running in pop mode.\f")
+    cli_report(txt="Running in pop mode ...",rule=FALSE,alert="info")
     ncbi.clean.excl.filt <- ncbi.clean.excl
-    } else {stop(writeLines("Error! the '-i' flag must be 'true' or 'false'."))
+    } else {stop(cli::cli_alert_danger("ERROR the '-i' flag must be 'true' or 'false'."))
 }
 
 
@@ -93,8 +95,10 @@ nspp <- dplyr::distinct(ncbi.clean.excl.filt,scientificName) |> nrow()
 ngene <- dplyr::distinct(ncbi.clean.excl.filt,gene) |> nrow()
 
 # print
-writeLines(glue::glue("After filtering, {nseq} sequence(s) for {nspp} species have been retained for {ngene} genes as follows:",.trim=FALSE))
+cli_report(txt=glue::glue("After filtering, {nseq} sequence(s) for {nspp} species have been retained for {ngene} genes as follows:"),rule=FALSE,alert="info")
+#writeLines(glue::glue("After filtering, {nseq} sequence(s) for {nspp} species have been retained for {ngene} genes as follows:",.trim=FALSE))
 ncbi.clean.excl.filt |> dplyr::group_by(gene) |> dplyr::summarise(n=n()) |> knitr::kable()
 
 # file
-writeLines(glue::glue("\nCleaning of sequence data completed. Output written to 'temp/{basename(today.dir)}/ncbi-clean.csv'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Cleaning of sequence data completed. Output written to 'temp/{basename(today.dir)}/ncbi-clean.csv'."),rule=TRUE,alert="success")
+#writeLines(glue::glue("\nCleaning of sequence data completed. Output written to 'temp/{basename(today.dir)}/ncbi-clean.csv'.\n",.trim=FALSE))

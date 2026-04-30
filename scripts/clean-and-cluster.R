@@ -4,7 +4,8 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("\nCleaning and clustering sequence data ...\n")
+#writeLines("\nCleaning and clustering sequence data ...\n")
+cli_report(txt="Running 'clean-and-cluster.R' ... Cleaning and clustering sequence data ...",rule=FALSE,alert="info")
 
 # get args
 option_list <- list( 
@@ -76,6 +77,11 @@ all.clusters.desc <- all.clusters.red |>
 readr::write_csv(all.clusters.desc,file=here::here(today.dir,"clusters.csv"))
 
 # print and write out table
-writeLines(glue::glue("\nTop 20 clusters with >={opt$minclust} sequences, including file size in kb, n sequences, and description of first sequence.\n",.trim=FALSE))
-writeLines(glue::glue("\nTable written out to {here(today.dir,'clusters.csv')}"))
+cli_report(txt=glue::glue("Top 20 clusters with >={opt$minclust} sequences, including file size in kb, n sequences, and description of first sequence."),rule=FALSE,alert="info")
+#writeLines(glue::glue("\nTop 20 clusters with >={opt$minclust} sequences, including file size in kb, n sequences, and description of first sequence.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Table written out to {here(today.dir,'clusters.csv')}"),rule=FALSE,alert="info")
+#writeLines(glue::glue("\nTable written out to {here(today.dir,'clusters.csv')}"))
 all.clusters.desc |> dplyr::slice_head(n=20) |> dplyr::select(-path) |> knitr::kable()
+
+# report
+cli_report(txt="Clustering step completed.",rule=TRUE,alert="success")

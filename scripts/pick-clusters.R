@@ -4,7 +4,8 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("\nPicking clusters ...\n")
+#writeLines("\nPicking clusters ...\n")
+cli_report(txt="Running 'pick-clusters.R' ... Picking clusters ...",rule=FALSE,alert="info")
 
 # get args
 option_list <- list( 
@@ -39,5 +40,7 @@ cluster.gene.path <- cluster.gene %>% dplyr::left_join(clusters,by=join_by(clust
 invisible(mapply(function(x,y) load_and_rename(gene=x,path=y,wd=today.dir), x=pull(cluster.gene.path,gene), y=pull(cluster.gene.path,path), SIMPLIFY=TRUE,USE.NAMES=FALSE))
 
 # print 
-writeLines(paste("\nTotal",length(genes.chosen),"gene clusters written to:\n"))
+cli_report(txt=glue::glue("Total {length(genes.chosen)} gene clusters written to:"),rule=FALSE,alert="info")
+#writeLines(paste("\nTotal",length(genes.chosen),"gene clusters written to:\n"))
 writeLines(here::here(today.dir,list.files(today.dir,"gene\\.")))
+cli_report(txt="Cluster picking step completed.",rule=TRUE,alert="success")

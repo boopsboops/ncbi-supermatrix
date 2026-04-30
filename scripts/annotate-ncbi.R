@@ -9,14 +9,18 @@
 
 source(here::here("scripts/load-libs-funs.R"))
 
+# info
+#writeLines("Annotating sequence data ...")
+cli_report(txt="Running 'annotate-ncbi.R' ... Annotating sequence data ...",rule=FALSE,alert="info")
+
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Working in directory 'temp/{basename(today.dir)}'."),rule=FALSE,alert="info")
+#writeLines(glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 #today.dir <- here("temp",paste0("Results_",Sys.Date()))
 #if(!dir.exists(today.dir)) {dir.create(today.dir,recursive=TRUE)}
 
-# info
-writeLines("Annotating sequence data ...")
+
 
 # get args
 option_list <- list(
@@ -53,7 +57,8 @@ set.seed(42)
 ids.all <- sample(ncbi.accs)
 # chunk
 chunk.frag <- unname(split(ids.all, ceiling(seq_along(ids.all)/chunk)))
-writeLines("\nRetrieving metadata from NCBI ...\n")
+cli_report(txt="Retrieving metadata from NCBI ...",rule=FALSE,alert="info")
+#writeLines("\nRetrieving metadata from NCBI ...\n")
 
 #threads error
 err.msg <- glue::glue("Error! You requested {opt$threads} thread(s), but there are only {length(chunk.frag)} chunk(s). Please use equal or fewer threads than chunks.")
@@ -64,7 +69,8 @@ ncbi.frag <- mcmapply(FUN=ncbi_byid_parallel, chunk.frag, SIMPLIFY=FALSE, USE.NA
 
 # check for errors (should all be "data.frame")
 if(length(sapply(ncbi.frag,class)) == length(which(sapply(ncbi.frag,class) == "data.frame"))) {
-    writeLines("\nNCBI metadata sucessfully retrieved.")
+    cli_report(txt="NCBI metadata sucessfully retrieved.",rule=FALSE,alert="success")
+    #writeLines("\nNCBI metadata sucessfully retrieved.")
     } else {writeLines("\nNCBI search failed, try again")}
 
 # join
@@ -74,7 +80,8 @@ frag.df <- tibble::as_tibble(bind_rows(ncbi.frag))
 ##### ANNOTATE WITH FISHBASE OR NCBI TAXONOMY #####
 
 # info
-writeLines("\nNow retrieving taxonomy ...\n")
+#writeLines("\nNow retrieving taxonomy ...\n")
+cli_report(txt="Now retrieving taxonomy ...",rule=FALSE,alert="info")
 
 # get genera
 frag.df.gens <- frag.df |> dplyr::mutate(genus=stringr::str_split_fixed(taxon," ",2)[,1])
@@ -87,13 +94,14 @@ if (opt$classification=="ncbi") {
     fb.gens <- ncbi_annotate(genera=list.gens) 
     } else if (opt$classification=="fishbase") {
     # FISHBASE #
-    writeLines(glue::glue("Using FishBase taxonomy version {sort(rfishbase::available_releases(),decreasing=TRUE)[1]}."))
+    cli_report(txt=glue::glue("Using FishBase taxonomy version {sort(rfishbase::available_releases(),decreasing=TRUE)[1]}."),rule=FALSE,alert="info")
+    #writeLines(glue::glue("Using FishBase taxonomy version {sort(rfishbase::available_releases(),decreasing=TRUE)[1]}."))
     # get fb table
     fb.gens <- fishbase_annotate(genera=list.gens)
     # close connections
     #rfishbase::db_disconnect()
     # stop
-} else stop(writeLines("Error! The '-c' flag must be either 'ncbi' or 'fishbase'."))
+} else stop(cli::cli_alert_danger("ERROR The '-c' flag must be either 'ncbi' or 'fishbase'."))
 
 # join to ncbi table and to genes table
 frag.df.gens.genes <- frag.df.gens |> dplyr::left_join(fb.gens,by=join_by(genus)) |> dplyr::left_join(ids.all.tab,by=join_by(acc_no))
@@ -102,4 +110,5 @@ frag.df.gens.genes <- frag.df.gens |> dplyr::left_join(fb.gens,by=join_by(genus)
 frag.df.gens.genes |> readr::write_csv(here::here(today.dir,"ncbi-raw.csv"))
 
 # info
-writeLines(glue::glue("\nAnnotation of sequence data completed. Output written to 'temp/{basename(today.dir)}/ncbi-raw.csv'.\n",.trim=FALSE))
+#writeLines(glue::glue("\nAnnotation of sequence data completed. Output written to 'temp/{basename(today.dir)}/ncbi-raw.csv'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Annotation of sequence data completed. Output written to 'temp/{basename(today.dir)}/ncbi-raw.csv'."),rule=TRUE,alert="success")

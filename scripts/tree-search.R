@@ -5,7 +5,8 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("Generating phylogenetic trees (may take a while) ...\n")
+#writeLines("Generating phylogenetic trees (may take a while) ...\n")
+cli_report(txt="Running 'tree-search.R' ... Generating phylogenetic trees (may take a while) ...",rule=FALSE,alert="info")
 
 # get args
 option_list <- list( 
@@ -28,7 +29,8 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_h
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Working in directory 'temp/{basename(today.dir)}'."),rule=FALSE,alert="info")
+#writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 #ncbi.clean <- read_csv(here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 # list fasta
@@ -60,3 +62,5 @@ if(length(fasta.files.tree) < length(fasta.files)) {
     fasta.files.err.genes <- paste(fasta.files.err,collapse=", ")
     writeLines(glue::glue("\nWARNING! The following loci had < 5 individuals, so gene trees could not be computed for these: {fasta.files.err.genes}\n",.trim=FALSE))
 }
+
+cli_report(txt=glue::glue("Phylogenetic tree construction completed."),rule=TRUE,alert="success")

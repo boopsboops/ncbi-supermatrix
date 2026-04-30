@@ -5,7 +5,8 @@
 source(here::here("scripts/load-libs-funs.R"))
 
 # info
-writeLines("Aligning and trimming sequence data ...\n")
+#writeLines("Aligning and trimming sequence data ...\n")
+cli_report(txt="Running 'align-trim-concatenate.R' ... Aligning and trimming sequence data ...",rule=FALSE,alert="info")
 
 # get args
 option_list <- list( 
@@ -25,7 +26,8 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_h
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
-writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
+cli_report(txt=glue::glue("Working in directory 'temp/{basename(today.dir)}'."),rule=FALSE,alert="info")
+#writeLines(glue::glue("Working in directory 'temp/{basename(today.dir)}'.\n",.trim=FALSE))
 ncbi.clean <- readr::read_csv(here::here(today.dir,"ncbi-clean.csv"),show_col_types=FALSE,col_types=cols(.default=col_character()))
 
 #### ALIGN AND TRIM FASTA #####
@@ -48,7 +50,8 @@ purrr::walk(genes.files, \(x) trim_fasta(infile=x,prop=opt$prop))
 
 # end the script if in pop mode
 if(opt$indiv == "true") {
-   cli::cli_alert_success("Finished running in pop mode.\f")
+   cli_report(txt="Finished running in pop mode.",rule=FALSE,alert="success")
+   #cli::cli_alert_success("Finished running in pop mode.\f")
    quit(save="no")
 }
 
@@ -74,7 +77,10 @@ genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"concatenated.al
 partition_table(mat=ali.all.mat) |> readr::write_tsv(here::here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
 
 # file
-writeLines(glue::glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.fasta'.",.trim=FALSE))
-writeLines(glue::glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.nex'.",.trim=FALSE))
-writeLines(glue::glue("\nConcatenated matrix written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.phy'.",.trim=FALSE))
-writeLines(glue::glue("\nRAxML partitions file written to 'temp/{basename(today.dir)}/concatenated.aligned.trimmed.parts'.\n",.trim=FALSE))
+cli_report(txt="Trimmed alignments and partitions files written to:",rule=FALSE,alert="info")
+writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.fasta'."))
+writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.nex'."))
+writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.phy'."))
+writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.parts'."))
+
+cli_report(txt="Alignment and trimming completed.",rule=TRUE,alert="success")
