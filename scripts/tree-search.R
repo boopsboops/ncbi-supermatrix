@@ -60,7 +60,7 @@ if(length(fasta.files.tree) < length(fasta.files)) {
     # get names of length <= 4 
     fasta.files.err <- fasta.files[files.fas.length <= 4] |> basename() |> stringr::str_replace_all("\\.aligned\\.trimmed\\.fasta","")
     fasta.files.err.genes <- paste(fasta.files.err,collapse=", ")
-    writeLines(glue::glue("\nWARNING! The following loci had < 5 individuals, so gene trees could not be computed for these: {fasta.files.err.genes}\n",.trim=FALSE))
+    cli::cli_alert_danger(glue::glue("WARNING The following loci had < 5 individuals, so gene trees could not be computed for these: {fasta.files.err.genes}\n",.trim=FALSE))
 }
 
 cli_report(txt=glue::glue("Phylogenetic tree construction completed."),rule=TRUE,alert="success")
