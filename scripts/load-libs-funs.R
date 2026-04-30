@@ -295,7 +295,7 @@ write_fasta <- function(df,genez,dir,pop) {
 # ALIGN FASTA
 align_fasta <- function(infile,threads) {
     outfile <- stringr::str_replace_all(infile,"\\.fasta",".aligned.fasta")
-    exe.string <- glue::glue("mafft --quiet --auto --thread {threads} {infile} > {outfile}")
+    exe.string <- glue::glue("mafft --adjustdirection --quiet --auto --thread {threads} {infile} > {outfile}")
     system(exe.string)
     #writeLines(glue("Aligned fasta file written to '{basename(outfile)}'.",.trim=FALSE))
 }
