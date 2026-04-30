@@ -77,7 +77,10 @@ The `clean-and-cluster.R` script dereplicates (optional) and cleans up the resul
 #    dereplication removes all identical (duplicate) sequences
 #    to remove duplicates use a value of 'true'
 #    to keep duplicates use a value of 'false'
-scripts/clean-and-cluster.R -n 10 -c 0.6 -m 2 -d true
+# flag '-t' [integer] is multithreading for vsearch
+#    do not use a '-t' value of more threads than is available on your machine
+#    a '-t' value of 0 uses auto threads (DO NOT do this on a shared server)
+scripts/clean-and-cluster.R -n 10 -c 0.6 -m 2 -d true -t 0
 ```
 
 

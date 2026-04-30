@@ -12,7 +12,8 @@ option_list <- list(
     make_option(c("-n","--maxns"), type="numeric"),
     make_option(c("-c","--clustprop"), type="numeric"),
     make_option(c("-m","--minclust"), type="numeric"),
-    make_option(c("-d","--derep"), type="character")
+    make_option(c("-d","--derep"), type="character"),
+    make_option(c("-t","--threads"), type="numeric")
     )
 
 # set args
@@ -25,13 +26,13 @@ today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE)
 fas.in <- here::here(today.dir,"genbank-dump.fasta")
 
 # dereplicate
-dereplicate_fasta(infile=fas.in,dereplicate=opt$derep)
+dereplicate_fasta(infile=fas.in,dereplicate=opt$derep,threads=opt$threads)
 
 # filter
-filter_fasta(infile=fas.in,maxns=opt$maxns)
+filter_fasta(infile=fas.in,maxns=opt$maxns,threads=opt$threads)
 
 # cluster
-cluster_fasta(infile=fas.in,identity=opt$clustprop)
+cluster_fasta(infile=fas.in,identity=opt$clustprop,threads=opt$threads)
 
 # load clusters
 clust.files <- list.files(here::here(today.dir),pattern="cluster\\.",full.names=TRUE)

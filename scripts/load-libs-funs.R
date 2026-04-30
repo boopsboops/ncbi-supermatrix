@@ -115,10 +115,10 @@ ncbi_byid_parallel <- function(accs){
 
 
 # DEREPLICATE FASTA
-dereplicate_fasta <- function(infile,dereplicate) {
+dereplicate_fasta <- function(infile,dereplicate,threads) {
     outfile <- stringr::str_replace_all(infile,"\\.fasta",".derep.fasta")
         if (dereplicate=="true") {
-            exe.string <- paste("vsearch --threads 0 --fastx_uniques",infile,"--fastaout",outfile)
+            exe.string <- glue::glue("vsearch --threads {threads} --fastx_uniques {infile} --fastaout {outfile}")
             system(exe.string)
         } else if (dereplicate=="false") {
             file.copy(infile,outfile)
@@ -127,20 +127,20 @@ dereplicate_fasta <- function(infile,dereplicate) {
 
 
 # FILTER FASTA
-filter_fasta <- function(infile,maxns) {
+filter_fasta <- function(infile,maxns,threads) {
     infile <- stringr::str_replace_all(infile,"\\.fasta",".derep.fasta")
     outfile <- stringr::str_replace_all(infile,"\\.fasta",".filtered.fasta")
-    exe.string <- paste("vsearch --threads 0 -fastx_filter",infile,"--fastq_maxns",maxns,"--fastaout",outfile)
+    exe.string <- glue::glue("vsearch --threads {threads} -fastx_filter {infile} --fastq_maxns {maxns} --fastaout {outfile}")
     system(exe.string)
 }
 
 
 # CLUSTER FASTA
-cluster_fasta <- function(infile,identity) {
+cluster_fasta <- function(infile,identity,threads) {
     infile <- stringr::str_replace_all(infile,"\\.fasta",".derep.filtered.fasta")
     outfile <- here::here(today.dir,"cluster.")
     stringr::str_replace_all(infile,"genbank-dump.derep.filtered.fasta","cluster.")
-    exe.string <- paste("vsearch --threads 0 --cluster_fast",infile,"--id",identity,"--clusters",outfile)
+    exe.string <- glue::glue("vsearch --threads {threads} --cluster_fast {infile} --id {identity} --clusters {outfile}")
     system(exe.string)
 }
 
