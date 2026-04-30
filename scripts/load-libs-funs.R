@@ -140,7 +140,7 @@ cluster_fasta <- function(infile,identity,threads) {
     infile <- stringr::str_replace_all(infile,"\\.fasta",".derep.filtered.fasta")
     outfile <- here::here(today.dir,"cluster.")
     stringr::str_replace_all(infile,"genbank-dump.derep.filtered.fasta","cluster.")
-    exe.string <- glue::glue("vsearch --threads {threads} --cluster_fast {infile} --id {identity} --clusters {outfile}")
+    exe.string <- glue::glue("vsearch --threads {threads} --cluster_fast {infile} --id {identity} --clusters {outfile} --strand both")
     system(exe.string)
 }
 
