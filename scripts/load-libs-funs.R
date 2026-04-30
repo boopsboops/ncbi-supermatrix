@@ -52,7 +52,7 @@ entrez_fetch_parallel <- function(webhist,chunks,file) {
 
 
 # ENTREZ DOWNLOAD
-entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry) {
+entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry,mito) {
     if (append=="false") {
         file.create(fasout,overwrite=TRUE)
     } else if (append=="true") {
@@ -61,7 +61,12 @@ entrez_download <- function(clade,minlen,maxlen,batchsize,fasout,append,dry) {
     rtm <- as.integer(batchsize)
     nots <- glue::glue("NOT \"PREDICTED\"[All Fields] NOT \"UNVERIFIED\"[All Fields] NOT \"microsatellite\"[All Fields] NOT \"pseudogene\"[All Fields] NOT \"genomic survey sequence\"[All Fields]")# NOT \"transcribed\"[All Fields] NOT \"cDNA\"[All Fields]  NOT \"mRNA\"[All Fields] NOT \"whole genome shotgun sequence\"[All Fields]
     if (rtm > 9999) {stop(cli::cli_alert_danger("ERROR Batch size can be no larger than 9,999."))}
-    es.res <- rentrez::entrez_search(db="nucleotide",term=glue::glue("(\"{clade}\"[ORGANISM] AND {minlen}:{maxlen}[SLEN]) {nots}"),retmax=999999,use_history=TRUE)
+    if (mito=="true") {
+        es.res <- rentrez::entrez_search(db="nucleotide",term=glue::glue("(\"{clade}\"[ORGANISM] AND {minlen}:{maxlen}[SLEN]) AND (mitochondrion[TITLE] OR mitochondrial[TITLE]) {nots}"),retmax=999999,use_history=TRUE)
+    }
+    if (mito=="false") {
+        es.res <- rentrez::entrez_search(db="nucleotide",term=glue::glue("(\"{clade}\"[ORGANISM] AND {minlen}:{maxlen}[SLEN]) {nots}"),retmax=999999,use_history=TRUE)
+    }
     if (dry=="true") {stop(cli_report(txt=glue::glue("Information: The number of hits for this search is {es.res$count}. Ensure that your batch size '-b' is lower than this value (but no larger than 9,999)."),rule=FALSE,alert="info"),call.=FALSE)}
     if (rtm > es.res$count) {stop(cli::cli_alert_danger(glue::glue("Error! Batch size value ({rtm}) is larger than number of hits ({es.res$count}). Please use a smaller '-b' value.")))}
     cli_report(txt=glue::glue("NCBI search reports {length(es.res$ids)} hits for {clade}."),rule=FALSE,alert="info")

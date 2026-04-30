@@ -18,7 +18,8 @@ option_list <- list(
     make_option(c("-x","--maxlen"), type="numeric"),
     make_option(c("-b","--batch"), type="numeric"),
     make_option(c("-a","--append"), type="character"),
-    make_option(c("-d","--dry"), type="character")    
+    make_option(c("-d","--dry"), type="character"),
+    make_option(c("-m","--mito"), type="character")
     )
 
 # set args
@@ -33,7 +34,7 @@ if(stringr::str_detect(opt$clade,"_")) {
 opt$clade <- stringr::str_replace_all(opt$clade,"_"," ")
 
 # run entrez
-seqs.fas <- entrez_download(clade=opt$clade,minlen=opt$minlen,maxlen=opt$maxlen,batchsize=opt$batch,append=opt$append,dry=opt$dry,fasout=here::here(today.dir,"genbank-dump.fasta"))
+seqs.fas <- entrez_download(clade=opt$clade,minlen=opt$minlen,maxlen=opt$maxlen,batchsize=opt$batch,append=opt$append,dry=opt$dry,mito=opt$mito,fasout=here::here(today.dir,"genbank-dump.fasta"))
 
 # remove annoying TRUE file
 if (file.exists(here::here("TRUE"))) {invisible(file.remove(here::here("TRUE")))}

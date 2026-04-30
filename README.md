@@ -50,10 +50,10 @@ With the `download-sequences.R` script we search for our clade of interest (catf
 #    the 'false' option will overwrite previous files, while 'true' will add data
 # flag '-d' [logical] is the dry run option that does not download any sequence data
 #    use this to estimate the custom batch size
-
-# automatically estimate batch size and download sequences 
-scripts/download-sequences.R -c Akysidae -n 500 -x 2500 -b 0 -a false -d false
-scripts/download-sequences.R -c Amblyceps_mangois -n 500 -x 2500 -b 0 -a true -d false
+# flag '-m' [logical] is the mitochondrial search option
+#    use this to restrict your search to mitochondrial DNA
+scripts/download-sequences.R -c Akysidae -n 500 -x 2500 -b 0 -a false -d false -m false
+scripts/download-sequences.R -c Amblyceps_mangois -n 500 -x 2500 -b 0 -a true -d false -m false
 ```
 
 
