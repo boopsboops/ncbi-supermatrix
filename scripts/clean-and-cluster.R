@@ -19,7 +19,12 @@ option_list <- list(
 # set args
 opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_help_option=FALSE))
 #opt <- NULL
-#opt$minclust <- 2
+#opt$maxns <- 0
+#opt$clustprop <- 0.6
+#opt$minclust <- 1
+#opt$derep <- "true"
+#opt$threads <- 0
+
 
 # get latest dir
 today.dir <- sort(grep("/Results_",list.dirs(here::here("temp"),recursive=FALSE),value=TRUE),decreasing=TRUE)[1]
@@ -44,7 +49,7 @@ clust.tab <- tibble::as_tibble(file.info(clust.files),rownames="path") |>
     dplyr::arrange(desc(size))
 
 # add data
-clust.fas <- mapply(ape::read.FASTA,clust.files,USE.NAMES=TRUE,SIMPLIFY=TRUE)
+clust.fas <- mapply(ape::read.FASTA,clust.files,USE.NAMES=TRUE,SIMPLIFY=FALSE)
 # add description
 first.acc <- mapply(function(x) labels(x)[[1]],clust.fas,USE.NAMES=TRUE,SIMPLIFY=TRUE)
 first.acc.tab <- tibble::tibble(cluster=basename(names(clust.fas)),facc=unname(first.acc))
