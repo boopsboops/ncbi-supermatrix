@@ -329,7 +329,7 @@ partition_table <- function(mat) {
 
 # NEW RAXML-NG FUN
 raxml_ng <- function(file,model,maxthreads,epsilon,verbose) {
-    string.search <- glue::glue("raxml-ng --search -threads auto{{{maxthreads}}} --workers auto --tree pars{{1}} --redo --seed 42 --model {model} --lh-epsilon {epsilon} --msa {file}")
+    string.search <- glue::glue("raxml-ng --search -threads auto{{{maxthreads}}} --workers auto --tree pars{{1}} --redo --seed 42 --model {model} --lh-epsilon {epsilon} --fast --msa {file}")
     if (verbose == "true") {
         system(command=string.search,ignore.stdout=FALSE)
         } else if (verbose == "false") {
