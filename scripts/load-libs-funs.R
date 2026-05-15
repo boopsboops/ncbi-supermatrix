@@ -173,7 +173,7 @@ clean_ncbi <- function(df) {
     df.clean <- df |>
         dplyr::distinct(gi_no,.keep_all=TRUE) |> 
         # filter
-        dplyr::filter(gi_no!="NCBI_GENOMES") |> 
+        #dplyr::filter(gi_no!="NCBI_GENOMES") |> # temporarily disabling this until further notice as filtering out good mitogenomes
         dplyr::filter(!is.na(sequence)) |> 
         dplyr::filter(!grepl("UNVERIFIED:",gene_desc)) |>
         dplyr::filter(!grepl("PREDICTED:",gene_desc)) |>
