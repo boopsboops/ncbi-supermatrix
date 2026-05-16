@@ -274,7 +274,7 @@ fishbase_annotate <- function(genera) {
 # ANNOTATE WITH NCBI TAXONOMY
 ncbi_annotate <- function(genera) {
     tax <- c("class","order","family")
-    tax.tab <- taxize::tax_name(sci=genera,get=tax,db="ncbi", messages=FALSE) #adding messages FALSE to suppress NCBI dialogue
+    tax.tab <- suppressMessages(taxize::tax_name(sci=genera,get=tax,db="ncbi", messages=FALSE)) #adding messages FALSE to suppress NCBI dialogue
     tax.tab.tib <- tax.tab |> tibble::as_tibble() |> dplyr::select(-db) |> dplyr::rename(genus=query) |> dplyr::relocate(genus,.after="family")
     return(tax.tab.tib)
 }
