@@ -174,22 +174,15 @@ clean_ncbi <- function(df) {
         dplyr::distinct(gi_no,.keep_all=TRUE) |> 
         # filter
         #dplyr::filter(gi_no!="NCBI_GENOMES") |> # temporarily disabling this until further notice as filtering out good mitogenomes
-        #dplyr::filter(!is.na(sequence)) |> 
-        #dplyr::filter(!grepl("UNVERIFIED:",gene_desc)) |>
-        #dplyr::filter(!grepl("PREDICTED:",gene_desc)) |>
-        #dplyr::filter(!grepl("similar to",gene_desc)) |> 
-        #dplyr::filter(!grepl("mRNA",gene_desc)) |> 
-        #dplyr::filter(!grepl("cDNA",gene_desc)) |> 
-        #dplyr::filter(!grepl("transcribed",gene_desc)) |> 
-        #dplyr::filter(!grepl("-like",gene_desc)) |> # temporarily editing these to see if it stops filtering gi_no: NCBI_GENOMES
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !is.na(sequence)) |> 
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !grepl("UNVERIFIED:", gene_desc)) |>
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !grepl("PREDICTED:", gene_desc)) |>
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !grepl("similar to", gene_desc)) |> 
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !grepl("mRNA", gene_desc)) |> 
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !grepl("cDNA", gene_desc)) |> 
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !grepl("transcribed", gene_desc)) |> 
-        dplyr::filter(gi_no == "NCBI_GENOMES" | !grepl("-like", gene_desc)) |>
+        dplyr::filter(!is.na(sequence)) |> 
+        dplyr::filter(!grepl("UNVERIFIED:",gene_desc)) |>
+        dplyr::filter(!grepl("PREDICTED:",gene_desc)) |>
+        dplyr::filter(!grepl("similar to",gene_desc)) |> 
+        dplyr::filter(!grepl("mRNA",gene_desc)) |> 
+        dplyr::filter(!grepl("cDNA",gene_desc)) |> 
+        dplyr::filter(!grepl("transcribed",gene_desc)) |> 
+        dplyr::filter(!grepl("-like",gene_desc)) |> 
+        
         # fix lan lon
         dplyr::mutate(lat=paste(stringr::str_split_fixed(lat_lon, " ", 4)[,1], stringr::str_split_fixed(lat_lon, " ", 4)[,2]), lon=paste(stringr::str_split_fixed(lat_lon, " ", 4)[,3], stringr::str_split_fixed(lat_lon, " ", 4)[,4])) |>
         dplyr::mutate(lat=dplyr::if_else(grepl(" N",lat), true=stringr::str_replace_all(lat," N",""), false=dplyr::if_else(grepl(" S",lat), true=paste0("-",stringr::str_replace_all(lat," S","")), false=lat))) |>
