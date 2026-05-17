@@ -178,7 +178,7 @@ clean_ncbi <- function(df) {
     df.other <- df |>
         dplyr::filter(gi_no != "NCBI_GENOMES") |>
         dplyr::distinct(gi_no, .keep_all = TRUE)
-    df <- dplyr::bind.rows(df.genomes, df.other)
+    df <- dplyr::bind_rows(df.genomes, df.other)
     df.clean <- df |>
         #dplyr::distinct(gi_no,.keep_all=TRUE) |> # disabling in favour of above func
         # filter
