@@ -170,8 +170,17 @@ tabulate_genes <- function(path) {
 
 # CLEAN NCBI DATA
 clean_ncbi <- function(df) {
+    # For NCBI_GENOMES entries: keep one unique entry per species (taxon)
+    # For all other entries: keep one unique entry per gi_no (standard deduplication)
+    df.genomes <- df |>
+        dplyr::filter(gi_no == "NCBI_GENOMES") |>
+        dplyr::distinct(taxon, .keep_all = TRUE)
+    df.other <- df |>
+        dplyr::filter(gi_no != "NCBI_GENOMES") |>
+        dplyr::distinct(gi_no, .keep_all = TRUE)
+    df <- dplyr::bind.rows(df.genomes, df.other)
     df.clean <- df |>
-        dplyr::distinct(gi_no,.keep_all=TRUE) |> 
+        #dplyr::distinct(gi_no,.keep_all=TRUE) |> # disabling in favour of above func
         # filter
         #dplyr::filter(gi_no!="NCBI_GENOMES") |> # temporarily disabling this until further notice as filtering out good mitogenomes
         dplyr::filter(!is.na(sequence)) |> 
