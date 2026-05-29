@@ -184,7 +184,7 @@ clean_ncbi <- function(df) {
         # filter
         #dplyr::filter(gi_no!="NCBI_GENOMES") |> # temporarily disabling this until further notice as filtering out good mitogenomes
         dplyr::filter(!is.na(sequence)) |> 
-        dplyr::filter(!grepl("UNVERIFIED:",gene_desc)) |>
+        #dplyr::filter(!grepl("UNVERIFIED:",gene_desc)) |> # temporarily disabling this until further notice as filtering out good mitogenomes
         dplyr::filter(!grepl("PREDICTED:",gene_desc)) |>
         dplyr::filter(!grepl("similar to",gene_desc)) |> 
         dplyr::filter(!grepl("mRNA",gene_desc)) |> 
