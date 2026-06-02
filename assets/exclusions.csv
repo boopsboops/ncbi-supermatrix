@@ -10,4 +10,6 @@ NC_048967.1,Corydoras sterbai,mito,same as H. trilineatum
 MN096579.1,Hoplisoma sterbai,mito,same as H. trilineatum
 NC_077553.1,Corydoras julii,mito,same as H. trilineatum
 OQ580986.1,Corydoras julii,mito,same as H. trilineatum
-NC_045877.1,Sturisomatichthys_panamense,mito,corrupted sequence (cytb is closest to Cetopsidae)
+NC_045877.1,Sturisomatichthys panamense,mito,corrupted sequence (cytb is closest to Cetopsidae)
+AP012011.1,Diplomystes nahuelbutaensis,mito,corrupted sequence (closest to Pangasiidae)
+NC_015823.1,Diplomystes nahuelbutaensis,mito,corrupted sequence (closest to Pangasiidae)
