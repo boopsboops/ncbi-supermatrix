@@ -46,7 +46,7 @@ if(opt$colour == "genus") {
     ncbi.clean.tips <- ncbi.clean |> dplyr::distinct(scientificName,genus,family) |> dplyr::mutate(tiplabel=glue::glue("{family} | {str_replace_all(scientificName,'_',' ')}")) |> dplyr::mutate(tip.colour=genus)
 }
 if(opt$colour == "species") {
-    ncbi.clean.tips <- ncbi.clean |> dplyr::distinct(gbAccession,scientificName,genus,family) |> dplyr::mutate(tiplabel=glue::glue("{gbAccession} | {str_replace_all(scientificName,'_',' ')}")) |> dplyr::mutate(tip.colour=scientificName)
+    ncbi.clean.tips <- ncbi.clean |> dplyr::distinct(gbAccession,scientificName,genus,family) |> dplyr::mutate(tiplabel=glue::glue("{family} | {gbAccession} | {str_replace_all(scientificName,'_',' ')}")) |> dplyr::mutate(tip.colour=scientificName)
 }
 if(opt$colour == "country") {
     ncbi.clean.tips <- ncbi.clean |> 

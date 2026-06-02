@@ -170,18 +170,28 @@ tabulate_genes <- function(path) {
 
 # CLEAN NCBI DATA
 clean_ncbi <- function(df) {
+    # For NCBI_GENOMES entries: keep one unique entry per species (taxon)
+    # For all other entries: keep one unique entry per gi_no (standard deduplication)
+    df.genomes <- df |>
+        dplyr::filter(gi_no == "NCBI_GENOMES") |>
+        dplyr::distinct(taxon, .keep_all = TRUE)
+    df.other <- df |>
+        dplyr::filter(gi_no != "NCBI_GENOMES") |>
+        dplyr::distinct(gi_no, .keep_all = TRUE)
+    df <- dplyr::bind_rows(df.genomes, df.other)
     df.clean <- df |>
-        dplyr::distinct(gi_no,.keep_all=TRUE) |> 
+        #dplyr::distinct(gi_no,.keep_all=TRUE) |> # disabling in favour of above func
         # filter
         #dplyr::filter(gi_no!="NCBI_GENOMES") |> # temporarily disabling this until further notice as filtering out good mitogenomes
         dplyr::filter(!is.na(sequence)) |> 
-        dplyr::filter(!grepl("UNVERIFIED:",gene_desc)) |>
+        #dplyr::filter(!grepl("UNVERIFIED:",gene_desc)) |> # temporarily disabling this until further notice as filtering out good mitogenomes
         dplyr::filter(!grepl("PREDICTED:",gene_desc)) |>
         dplyr::filter(!grepl("similar to",gene_desc)) |> 
         dplyr::filter(!grepl("mRNA",gene_desc)) |> 
         dplyr::filter(!grepl("cDNA",gene_desc)) |> 
         dplyr::filter(!grepl("transcribed",gene_desc)) |> 
-        dplyr::filter(!grepl("-like",gene_desc)) |>
+        dplyr::filter(!grepl("-like",gene_desc)) |> 
+        
         # fix lan lon
         dplyr::mutate(lat=paste(stringr::str_split_fixed(lat_lon, " ", 4)[,1], stringr::str_split_fixed(lat_lon, " ", 4)[,2]), lon=paste(stringr::str_split_fixed(lat_lon, " ", 4)[,3], stringr::str_split_fixed(lat_lon, " ", 4)[,4])) |>
         dplyr::mutate(lat=dplyr::if_else(grepl(" N",lat), true=stringr::str_replace_all(lat," N",""), false=dplyr::if_else(grepl(" S",lat), true=paste0("-",stringr::str_replace_all(lat," S","")), false=lat))) |>
@@ -274,7 +284,7 @@ fishbase_annotate <- function(genera) {
 # ANNOTATE WITH NCBI TAXONOMY
 ncbi_annotate <- function(genera) {
     tax <- c("class","order","family")
-    tax.tab <- taxize::tax_name(sci=genera,get=tax,db="ncbi")
+    tax.tab <- suppressMessages(taxize::tax_name(sci=genera,get=tax,db="ncbi", messages=FALSE)) #adding messages FALSE to suppress NCBI dialogue
     tax.tab.tib <- tax.tab |> tibble::as_tibble() |> dplyr::select(-db) |> dplyr::rename(genus=query) |> dplyr::relocate(genus,.after="family")
     return(tax.tab.tib)
 }

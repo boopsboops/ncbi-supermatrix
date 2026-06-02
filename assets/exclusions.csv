@@ -1,2 +1,15 @@
 acc,species,gene,problem
 MZ562703.1,Ancistrus temminckii,cox1,not temminckii
+PZ091021.1,Eques lanceolatus,mito,not siluriform
+PV742854.1,Eques lanceolatus,mito,not siluriform
+OR546151.1,Eques lanceolatus,mito,not siluriform
+NC_083003.1,Eques lanceolatus,mito,not siluriform
+NC_034999.1,Kryptopterus bicirrhis,mito,same as K. vitreolus
+KY569440.1,Kryptopterus bicirrhis,mito,same as K. vitreolus
+NC_048967.1,Corydoras sterbai,mito,same as H. trilineatum
+MN096579.1,Hoplisoma sterbai,mito,same as H. trilineatum
+NC_077553.1,Corydoras julii,mito,same as H. trilineatum
+OQ580986.1,Corydoras julii,mito,same as H. trilineatum
+NC_045877.1,Sturisomatichthys panamense,mito,corrupted sequence (cytb is closest to Cetopsidae)
+AP012011.1,Diplomystes nahuelbutaensis,mito,corrupted sequence (closest to Pangasiidae)
+NC_015823.1,Diplomystes nahuelbutaensis,mito,corrupted sequence (closest to Pangasiidae)
