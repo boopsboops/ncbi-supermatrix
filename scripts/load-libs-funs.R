@@ -113,7 +113,7 @@ ncbi_byid_parallel <- function(accs){
     } else {
         end_time <- Sys.time()
         #writeLines(paste0("Metadata for ",length(accs)," accessions downloaded (starting ",accs[1],"). Download took ",round(as.numeric(end_time-start_time),digits=2)," seconds."))
-        cli_report(txt=glue::glue("Metadata for {length(accs)} accessions downloaded (starting {accs[1]}. Download took {round(as.numeric(end_time-start_time),digits=2)} seconds."),rule=FALSE,alert="success")
+        cli_report(txt=glue::glue("Metadata for {length(accs)} accessions downloaded (starting {accs[1]}). Download took {round(as.numeric(end_time-start_time),digits=2)} seconds."),rule=FALSE,alert="success")
         return(ncbi.tab)
     }
 }
