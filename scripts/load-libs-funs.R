@@ -181,7 +181,7 @@ clean_ncbi <- function(df) {
         dplyr::filter(!grepl("mRNA",gene_desc)) |> 
         dplyr::filter(!grepl("cDNA",gene_desc)) |> 
         dplyr::filter(!grepl("transcribed",gene_desc)) |> 
-        dplyr::filter(!grepl("-like",gene_desc)) |>
+        #dplyr::filter(!grepl("-like",gene_desc)) |>
         # fix lan lon
         dplyr::mutate(lat=paste(stringr::str_split_fixed(lat_lon, " ", 4)[,1], stringr::str_split_fixed(lat_lon, " ", 4)[,2]), lon=paste(stringr::str_split_fixed(lat_lon, " ", 4)[,3], stringr::str_split_fixed(lat_lon, " ", 4)[,4])) |>
         dplyr::mutate(lat=dplyr::if_else(grepl(" N",lat), true=stringr::str_replace_all(lat," N",""), false=dplyr::if_else(grepl(" S",lat), true=paste0("-",stringr::str_replace_all(lat," S","")), false=lat))) |>
