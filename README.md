@@ -148,7 +148,12 @@ The `align-trim-concatenate.R` script aligns each locus seperately and trims mis
 #    it is intended for separate gene analyses but may be adapted in future to concatenate
 #    '-i false' will produce one sequence per species
 #    '-i true' will produce all sequences per species
-scripts/align-trim-concatenate.R -p 0.2 -t 4 -i false
+# flag '-m' [logical] is the mitochondrial gene concatenation flag
+#    '-i false' will not concatenate mtDNA genes
+#    '-i true' will concatenate all mtDNA genes into an additional file
+#    mitochondrial genes must be named one of the following in the 'pick-clusters.R' script to work:
+#    "12s","16s","nd1","nd2","cox1","cox2","atp8","atp6","cox3","nd3","nd4l","nd4","nd5","nd6","cytb","dloop" 
+scripts/align-trim-concatenate.R -p 0.2 -t 4 -i false -m false
 ```
 
 

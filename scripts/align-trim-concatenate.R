@@ -12,7 +12,8 @@ cli_report(txt="Running 'align-trim-concatenate.R' ... Aligning and trimming seq
 option_list <- list( 
     make_option(c("-p","--prop"), type="numeric"),
     make_option(c("-t","--threads"), type="numeric"),
-    make_option(c("-i","--indiv"), type="character")
+    make_option(c("-i","--indiv"), type="character"),
+    make_option(c("-m","--mito"), type="character")
     )
 
 # set args
@@ -20,7 +21,7 @@ opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list,add_h
 #opt <- NULL
 #opt$prop <- 0.2
 #opt$threads <- 4
-
+#opt$mito <- "true"
 
 ##### LOAD DATA #####
 
@@ -76,11 +77,21 @@ genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"concatenated.al
 # make partion file and write out
 partition_table(mat=ali.all.mat) |> readr::write_tsv(here::here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
 
+# to concatentate just mitochondrial genes
+if(opt$mito=="true") {
+    mito.genes <- c("12s","16s","nd1","nd2","cox1","cox2","atp8","atp6","cox3","nd3","nd4l","nd4","nd5","nd6","cytb","dloop")
+    ali.all.genes <- stringr::str_split_fixed(basename(ali.files),"\\.",4)[,1]
+    ali.all.mat.mito <- ali.all.mat[which(ali.all.genes %in% mito.genes)]
+    genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat.mito,fill.with.gaps=TRUE)))
+    genes.concat |> ape::write.FASTA(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.fasta"))
+    genes.concat |> ape::write.dna(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
+    genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.nex"),interleaved=FALSE)
+}
+
 # file
 cli_report(txt="Trimmed alignments and partitions files written to:",rule=FALSE,alert="info")
 writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.fasta'."))
 writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.nex'."))
 writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.phy'."))
 writeLines(glue::glue("'temp/{basename(today.dir)}/concatenated.aligned.trimmed.parts'."))
-
 cli_report(txt="Alignment and trimming completed.",rule=TRUE,alert="success")
