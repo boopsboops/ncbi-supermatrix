@@ -314,9 +314,9 @@ trim_fasta <- function(infile,prop) {
 
 
 # MAKE PARTS
-partition_table <- function(mat) {
+partition_table <- function(mat,genelist) {
     dims <- purrr::map(mat, \(x) dim(x)[2]) |> unlist()
-    parts.tib <- tibble::tibble(gene=genes,len=dims,cs=cumsum(dims)) |> 
+    parts.tib <- tibble::tibble(gene=genelist,len=dims,cs=cumsum(dims)) |> 
         dplyr::mutate(cs1=cs+1,start=lag(cs1)) |>
         tidyr::replace_na(list(start=1)) |>
         dplyr::rename(end=cs) %>%

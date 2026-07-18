@@ -66,26 +66,38 @@ ali.all <- purrr::map(ali.files, \(x) ape::read.FASTA(file=x))
 # convert to matrix
 ali.all.mat <- purrr::map(ali.all, as.matrix)
 
-# concatenate
-genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat,fill.with.gaps=TRUE)))
-
-# write out
-genes.concat |> ape::write.FASTA(file=here::here(today.dir,"concatenated.aligned.trimmed.fasta"))
-genes.concat |> ape::write.dna(file=here::here(today.dir,"concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
-genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"concatenated.aligned.trimmed.nex"),interleaved=FALSE)
-
-# make partion file and write out
-partition_table(mat=ali.all.mat) |> readr::write_tsv(here::here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
+if(opt$mito=="false") {
+    # concatenate
+    genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat,fill.with.gaps=TRUE)))
+    # write out
+    genes.concat |> ape::write.FASTA(file=here::here(today.dir,"concatenated.aligned.trimmed.fasta"))
+    genes.concat |> ape::write.dna(file=here::here(today.dir,"concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
+    genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"concatenated.aligned.trimmed.nex"),interleaved=FALSE)
+    # make partion file and write out
+    partition_table(mat=ali.all.mat,genelist=genes) |> readr::write_tsv(here::here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
+}
 
 # to concatentate just mitochondrial genes
 if(opt$mito=="true") {
+    # get mito list and subset
     mito.genes <- c("12s","16s","nd1","nd2","cox1","cox2","atp8","atp6","cox3","nd3","nd4l","nd4","nd5","nd6","cytb","dloop")
-    ali.all.genes <- stringr::str_split_fixed(basename(ali.files),"\\.",4)[,1]
-    ali.all.mat.mito <- ali.all.mat[which(ali.all.genes %in% mito.genes)]
-    genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat.mito,fill.with.gaps=TRUE)))
-    genes.concat |> ape::write.FASTA(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.fasta"))
-    genes.concat |> ape::write.dna(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
-    genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.nex"),interleaved=FALSE)
+    ali.all.mat.mito <- ali.all.mat[which(genes %in% mito.genes)]
+    # write out
+    mito.genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat.mito,fill.with.gaps=TRUE)))
+    mito.genes.concat |> ape::write.FASTA(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.fasta"))
+    mito.genes.concat |> ape::write.dna(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
+    mito.genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"mtdna.concatenated.aligned.trimmed.nex"),interleaved=FALSE)
+    # join concat mito with nuc
+    ali.all.mat.nuc <- ali.all.mat[which(!genes %in% mito.genes)]
+    ali.all.mat.nuc.mito <- c(ali.all.mat.nuc,list(as.matrix(mito.genes.concat)))
+    # write out
+    genes.concat <- as.list(do.call(cbind.DNAbin,args=c(ali.all.mat.nuc.mito,fill.with.gaps=TRUE)))
+    genes.concat |> ape::write.FASTA(file=here::here(today.dir,"concatenated.aligned.trimmed.fasta"))
+    genes.concat |> ape::write.dna(file=here::here(today.dir,"concatenated.aligned.trimmed.phy"),format="sequential",nbcol=-1,colsep="")
+    genes.concat |> ape::write.nexus.data(file=here::here(today.dir,"concatenated.aligned.trimmed.nex"),interleaved=FALSE)
+    # parts
+    genes.mito <- c(genes[which(!genes %in% mito.genes)],"mtdna")
+    partition_table(mat=ali.all.mat.nuc.mito,genelist=genes.mito) |> readr::write_tsv(here::here(today.dir,"concatenated.aligned.trimmed.parts"),col_names=FALSE)
 }
 
 # file
